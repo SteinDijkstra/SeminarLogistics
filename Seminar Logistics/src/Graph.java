@@ -36,13 +36,17 @@ public class Graph {
 	
 	//--------------Setters and getters----------------
 	/**
-	 * 
+	 * add new location to the model ONLY use for initialization
 	 * @param newLocation
 	 */
 	public void addLocation(Location newLocation) {
 		locations.add(newLocation);
 	}
 	
+	/**
+	 * get all locations in the graph
+	 * @return
+	 */
 	public List<Location> getLocations(){
 		return locations;
 	}
@@ -51,6 +55,9 @@ public class Graph {
 		return incidenceMatrix[from][to];
 	}
 	
+	public int[] getDistanceNeighbours(int from) {
+		return incidenceMatrix[from];
+	}
 	
 	//--------------Utility methods--------------------
 	
