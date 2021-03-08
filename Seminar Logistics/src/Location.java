@@ -9,6 +9,8 @@ public class Location {
 	private final int locationNumber; //index of the current location
 	private Container glassContainer; 
 	private Container plasticContainer;
+	//empty time glass
+	//empty time plastic
 
 	//-------------------Constructors-----------------
 	/**
