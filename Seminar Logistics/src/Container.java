@@ -96,7 +96,16 @@ public class Container {
 	}
 	
 	//--------------Utility methods--------------------
-	
+	/**
+	 * Update predictedn and actual amount of garbage. the randomNumber should be a based on a
+	 * standard normal number s.t. the additional garbage is distributed by N(mean, std^2)
+	 * @param randomNumber a double gotton from a N(0,1) variable.
+	 */
+	public void update(double randomNumber) {
+		predictedAmountGarbage+=meanGarbageDisposed;
+		// TODO check what should happen if addition is negative
+		actualAmountGarbage+=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
+	}
 	
 	
 	//--------------Other methods----------------------
