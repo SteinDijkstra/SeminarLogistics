@@ -11,12 +11,14 @@ public class Graph {
 	private List<Location> locations;//list of locations index also is the location Number
 	private int[][] incidenceMatrix;//incidence matrix, element i,j is equal to the travel time from i to j
 	
-	
-	public Graph() {
-		
-	}
 	//-------------------Constructors-----------------
-	
+	/**
+	 * Create an empty graph with maximal amount of vertices
+	 * @param size int value that specifies the total amount of locations
+	 */
+	public Graph(int size) {
+		incidenceMatrix=new int[size][size];
+	}
 	
 	//--------------Setters and getters----------------
 	

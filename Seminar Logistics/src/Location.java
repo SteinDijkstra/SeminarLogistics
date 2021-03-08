@@ -6,16 +6,24 @@
  */
 public class Location {
 	private final Graph graph; //graph the location is part of
-	private final int index; //index of the current location
+	private final int locationNumber; //index of the current location
 	private Container glassContainer; 
 	private Container plasticContainer;
-	
-	public Location() {
-		graph=null;
-		index=0;
-	}
+
 	//-------------------Constructors-----------------
-	
+	/**
+	 * 
+	 * @param graph
+	 * @param locationNumber
+	 * @param glass
+	 * @param plastic
+	 */
+	public Location(Graph graph,int locationNumber, Container glass, Container plastic) {
+		this.graph=graph;
+		this.locationNumber=locationNumber;
+		this.glassContainer=glass;
+		this.plasticContainer=plastic;
+	}
 	
 	//--------------Setters and getters----------------
 	
