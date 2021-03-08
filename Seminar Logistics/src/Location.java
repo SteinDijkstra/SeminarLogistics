@@ -14,5 +14,17 @@ public class Location {
 		graph=null;
 		index=0;
 	}
+	//-------------------Constructors-----------------
 	
+	
+	//--------------Setters and getters----------------
+	
+	
+	
+	
+	//--------------Utility methods--------------------
+	
+	
+	
+	//--------------Other methods----------------------
 }
