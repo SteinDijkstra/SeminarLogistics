@@ -15,7 +15,7 @@ public class Container {
 	//-------------------Constructors-----------------
 	/**
 	 * Constructor for a container with stochastic demand
-	 * @param capacity nonnegative value that represents the maximum capacity of a contianer
+	 * @param capacity nonnegative value that represents the maximum capacity of a container
 	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
 	 * @param std nonnegative integer that represent the standard deviation of the amount of garbage
 	 */
@@ -26,6 +26,20 @@ public class Container {
 		this.capacity=capacity;
 		meanGarbageDisposed=mean;
 		stdGarbageDisposed=std;
+	}
+	
+	/**
+	 * Constructor for a container with deterministic demand
+	 * @param capacity nonnegative value that represents the maximum capacity of a container
+	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
+	 */
+	public Container(int capacity, int mean) {
+		if(capacity<0||mean<0) {
+			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
+		}
+		this.capacity=capacity;
+		meanGarbageDisposed=mean;
+		stdGarbageDisposed=0;
 	}
 	
 	//--------------Setters and getters----------------
@@ -43,7 +57,7 @@ public class Container {
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
 	 * If the new value would lead to a negative amount of garbage an exception is thrown
 	 * if more garbage is added than the capacity the value is set equal to the capacity
-	 * @param change
+	 * @param change double value that specifies the change
 	 */
 	public void changeActualAmountGarbage(double change) {
 		if(actualAmountGarbage+change<0) {
@@ -69,7 +83,7 @@ public class Container {
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
 	 * If the new value would lead to a negative amount of garbage an exception is thrown
 	 * if more garbage is added than the capacity the value is set equal to the capacity
-	 * @param change
+	 * @param change double value that specifies the change
 	 */
 	public void changePredictedAmountGarbage(double change) {
 		if(predictedAmountGarbage+change<0) {
@@ -86,4 +100,7 @@ public class Container {
 	
 	
 	//--------------Other methods----------------------
+	
+	
+	
 }
