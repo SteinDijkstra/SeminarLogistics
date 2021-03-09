@@ -92,7 +92,14 @@ public class Graph {
 	}
 	
 	//--------------Utility methods--------------------
-	
+	public int getAmountOverflow() {
+		int sum =0;
+		for(Location loc:locations) {
+			if(loc.plasticOverflow()) {sum++;}
+			if(loc.glassOverflow()) {sum++;}
+		}
+		return sum;
+	}
 	
 	
 	//--------------Other methods----------------------
