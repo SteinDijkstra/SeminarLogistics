@@ -83,6 +83,14 @@ public class Graph {
 		return incidenceMatrix[from];
 	}
 	
+	/**
+	 * Return the number of locations in the graph
+	 * @return a integer amount
+	 */
+	public int getNumLocations() {
+		return locations.size();
+	}
+	
 	//--------------Utility methods--------------------
 	
 	
