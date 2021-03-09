@@ -11,8 +11,6 @@ public class Location {
 	private Container plasticContainer;
 	private final int glassEmptyTime;
 	private final int plasticEmptyTime;
-	//empty time glass
-	//empty time plastic
 
 	//-------------------Constructors-----------------
 	/**
@@ -190,4 +188,10 @@ public class Location {
 		}
 	}
 	//--------------Other methods----------------------
+	@Override
+	public String toString() {
+		String description= "Location "+this.locationNumber+"\n Plastic: "+plasticContainer.toString();
+		description+="\n Glass: "+glassContainer.toString();
+		return description;
+	}
 }

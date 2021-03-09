@@ -135,7 +135,10 @@ public class Container {
 	
 	
 	//--------------Other methods----------------------
-	
+	@Override
+	public String toString() {
+		return "Actual amount: "+this.actualAmountGarbage+" Predicted amount: "+this.predictedAmountGarbage+" Max amount: "+this.capacity;
+	}
 	
 	
 }
