@@ -9,6 +9,8 @@ public class Location {
 	private final int locationNumber; //index of the current location
 	private Container glassContainer; 
 	private Container plasticContainer;
+	private final int glassEmptyTime;
+	private final int plasticEmptyTime;
 	//empty time glass
 	//empty time plastic
 
@@ -20,11 +22,13 @@ public class Location {
 	 * @param glass
 	 * @param plastic
 	 */
-	public Location(Graph graph,int locationNumber, Container glass, Container plastic) {
+	public Location(Graph graph,int locationNumber, Container glass, Container plastic, int glassTime, int plasticTime) {
 		this.graph=graph;
 		this.locationNumber=locationNumber;
 		this.glassContainer=glass;
 		this.plasticContainer=plastic;
+		this.glassEmptyTime=glassTime;
+		this.plasticEmptyTime= plasticTime;
 	}
 	
 	//--------------Setters and getters----------------
