@@ -56,15 +56,11 @@ public class Container {
 	 * Changes the actual amount of garbage by the specified amount
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
 	 * If the new value would lead to a negative amount of garbage an exception is thrown
-	 * if more garbage is added than the capacity the value is set equal to the capacity
 	 * @param change double value that specifies the change
 	 */
 	public void changeActualAmountGarbage(double change) {
 		if(actualAmountGarbage+change<0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
-		} else if(actualAmountGarbage+change>capacity) {
-			//TODO more than capacity is allowed
-			actualAmountGarbage=capacity;
 		} else {
 			actualAmountGarbage+=change;
 		}
@@ -83,14 +79,11 @@ public class Container {
 	 * Changes the predicted amount of garbage by the specified amount
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
 	 * If the new value would lead to a negative amount of garbage an exception is thrown
-	 * if more garbage is added than the capacity the value is set equal to the capacity
 	 * @param change double value that specifies the change
 	 */
 	public void changePredictedAmountGarbage(double change) {
 		if(predictedAmountGarbage+change<0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
-		} else if(predictedAmountGarbage+change>capacity) {
-			predictedAmountGarbage=capacity;
 		} else {
 			predictedAmountGarbage+=change;
 		}
@@ -98,14 +91,14 @@ public class Container {
 	
 	//--------------Utility methods--------------------
 	/**
-	 * Update predictedn and actual amount of garbage. the randomNumber should be a based on a
+	 * Update predicted and actual amount of garbage. the randomNumber should be a based on a
 	 * standard normal number s.t. the additional garbage is distributed by N(mean, std^2)
 	 * @param randomNumber a double gotton from a N(0,1) variable.
 	 */
 	public void update(double randomNumber) {
-		predictedAmountGarbage+=meanGarbageDisposed;
-		// TODO check what should happen if addition is negative
-		actualAmountGarbage+=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
+		changePredictedAmountGarbage(meanGarbageDisposed);
+		double change=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
+		changeActualAmountGarbage(change<0?change:0);
 	}
 	
 	
