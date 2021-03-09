@@ -46,7 +46,7 @@ public class Graph {
 	 * add a list of locations to the model ONLY use for initialization
 	 * @param newLocation
 	 */
-	public void addLocation(List<Location> newLocation) {
+	public void addAllLocation(List<Location> newLocation) {
 		locations.addAll(newLocation);
 	}
 	
