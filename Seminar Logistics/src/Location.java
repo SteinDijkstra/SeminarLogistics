@@ -107,8 +107,91 @@ public class Location {
 		return locationNumber;
 	}
 	//--------------Utility methods--------------------
+	/**
+	 * check if plastic is overflowing
+	 * @return true if current amount is more than the capacity
+	 */
+	public boolean plasticOverflow() {
+		return plasticContainer.getActualAmountGarbage()>plasticContainer.getCapacity();
+	}
 	
+	/**
+	 * Check if paper is overflowing
+	 * @return true if current amount is more than the capacity
+	 */
+	public boolean glassOverflow() {
+		return glassContainer.getActualAmountGarbage()>glassContainer.getCapacity();
+	}
 	
+	/**
+	 * Return the distance to all neighbors
+	 * @return integer array with distances
+	 */
+	public int[] getDistanceNeighbours() {
+		return graph.getDistanceNeighbours(this.locationNumber);
+	}
 	
+	/**
+	 * Return a double array with the predicted plastic all neighbors have
+	 * @return a double array with plastic amount of neighbors
+	 */
+	public double[] getPlasticAmountNeighbours() {
+		double[] result = new double[graph.getNumLocations()];
+		int index=0;
+		for(Location neighbour:graph.getLocations()) {
+			result[index]=neighbour.getPredictedPlastic();
+			index++;
+		}
+		return result;
+	}
+	/**
+	 * return a double array with the predicted glass all neighbors have
+	 * @return a double array with glass amounf of neighbors in cubes
+	 */
+	public double[] getGlassAmountNeighbours() {
+		double[] result = new double[graph.getNumLocations()];
+		int index=0;
+		for(Location neighbour:graph.getLocations()) {
+			result[index]=neighbour.getPredictedGlass();
+			index++;
+		}
+		return result;
+	}
+	
+	/**
+	 * Empty the plastic container where the max additional capacity can be specified
+	 * @param maxEmpty leftover capacity of the truck
+	 * @return the actual amount emptied
+	 */
+	public double emptyPlastic(double maxEmpty) {
+		if(plasticContainer.getActualAmountGarbage()>maxEmpty) {//not all garbage can be collected
+			plasticContainer.changeActualAmountGarbage(-maxEmpty);
+			plasticContainer.setPredictedAmountGarbage(plasticContainer.getActualAmountGarbage());//TODO how accurate can this be estimated
+			return maxEmpty;
+		} else { //all garbaged can be collected
+			double amountEmptied=plasticContainer.getActualAmountGarbage();
+			plasticContainer.setActualAmountGarbage(0);
+			plasticContainer.setPredictedAmountGarbage(0);
+			return amountEmptied;
+		}
+	}
+	
+	/**
+	 * Empty the paper container where the max additional capacities specified
+	 * @param maxEmpty leftover capacity of the truck
+	 * @return the actual amount emptied
+	 */
+	public double emptyGlass(double maxEmpty) {
+		if(glassContainer.getActualAmountGarbage()>maxEmpty) {//not all garbage can be collected
+			glassContainer.changeActualAmountGarbage(-maxEmpty);
+			glassContainer.setPredictedAmountGarbage(glassContainer.getActualAmountGarbage());//TODO how accurate can this be estimated
+			return maxEmpty;
+		} else { //all garbaged can be collected
+			double amountEmptied=plasticContainer.getActualAmountGarbage();
+			glassContainer.setActualAmountGarbage(0);
+			glassContainer.setPredictedAmountGarbage(0);
+			return amountEmptied;
+		}
+	}
 	//--------------Other methods----------------------
 }
