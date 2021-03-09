@@ -67,6 +67,18 @@ public class Container {
 	}
 	
 	/**
+	 * set the actual amount of garbage equal to a certain number that is non negative
+	 * @param amount double value that is in the garbage bin
+	 */
+	public void setActualAmountGarbage(double amount) {
+		if(amount<0) {
+			throw new IllegalArgumentException("amount of garbage can not be negative");
+		} else {
+			actualAmountGarbage= amount;
+		}
+	}
+
+	/**
 	 * Returns the predicted amount of garbage present in the container
 	 * DO NOT USE FOR EMPTYING AND OVERFLOW STATISTIC PURPOSES
 	 * @return double value of cubic amount of garbage
@@ -86,6 +98,18 @@ public class Container {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
 		} else {
 			predictedAmountGarbage+=change;
+		}
+	}
+	
+	/**
+	 * set the predicted amount of garbage equal to a certain number that is non negative
+	 * @param amount double value that is in the garbage bin
+	 */
+	public void setPredictedAmountGarbage(double amount) {
+		if(amount<0) {
+			throw new IllegalArgumentException("amount of garbage can not be negative");
+		} else {
+			predictedAmountGarbage= amount;
 		}
 	}
 	
