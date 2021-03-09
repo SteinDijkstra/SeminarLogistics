@@ -16,11 +16,11 @@ public class Location {
 
 	//-------------------Constructors-----------------
 	/**
-	 * 
-	 * @param graph
-	 * @param locationNumber
-	 * @param glass
-	 * @param plastic
+	 * Create a new Location
+	 * @param graph which it is part of
+	 * @param locationNumber index of this location
+	 * @param glass a glass container
+	 * @param plastic a plastic container
 	 */
 	public Location(Graph graph,int locationNumber, Container glass, Container plastic, int glassTime, int plasticTime) {
 		this.graph=graph;
@@ -31,11 +31,81 @@ public class Location {
 		this.plasticEmptyTime= plasticTime;
 	}
 	
+
+
+	
+
 	//--------------Setters and getters----------------
+	/**
+	 * Return time to empty plastic
+	 * @return integer amount of time
+	 */
+	public int getPlasticEmptyTime() {
+		return plasticEmptyTime;
+	}
 	
+	/**
+	 * Return time to empty glass
+	 * @return integer amount of time
+	 */
+	public int getGlassEmpyTime() {
+		return glassEmptyTime;
+	}
 	
+	/**
+	 * Returns predicted amount of glass
+	 * @return double in cubes
+	 */
+	public double getPredictedGlass() {
+		return glassContainer.getPredictedAmountGarbage();
+	}
 	
+	/**
+	 * Returns actual amount of glass
+	 * @return double in cubes
+	 */
+	public double getActualGlass() {
+		return glassContainer.getActualAmountGarbage();
+	}
 	
+	/**
+	 * Returns predicted amount of plastic
+	 * @return double in cubes
+	 */
+	public double getPredictedPlastic() {
+		return plasticContainer.getPredictedAmountGarbage();
+	}
+	
+	/**
+	 * Returns actual amount of plastic
+	 * @return double in cubes
+	 */
+	public double getActualPlastic() {
+		return plasticContainer.getActualAmountGarbage();
+	}
+	
+	/**
+	 * Returns the glass container
+	 * @return a container object
+	 */
+	public Container getGlassContainer() {
+		return glassContainer;
+	}
+	/**
+	 * Returns the plastic container
+	 * @return a container object
+	 */
+	public Container getPlasticContainer() {
+		return plasticContainer;
+	}
+	
+	/**
+	 * Returns index
+	 * @return Integer
+	 */
+	public int getIndex() {
+		return locationNumber;
+	}
 	//--------------Utility methods--------------------
 	
 	
