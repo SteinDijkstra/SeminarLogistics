@@ -63,6 +63,7 @@ public class Container {
 		if(actualAmountGarbage+change<0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
 		} else if(actualAmountGarbage+change>capacity) {
+			//TODO more than capacity is allowed
 			actualAmountGarbage=capacity;
 		} else {
 			actualAmountGarbage+=change;
