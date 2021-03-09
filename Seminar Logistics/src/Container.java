@@ -6,9 +6,9 @@
  *
  */
 public class Container {
-	private final int capacity; //max capacity of this container
-	private final int meanGarbageDisposed; //mean garbage disposed
-	private final int stdGarbageDisposed; //standard deviation of garbage disposed
+	private final double capacity; //max capacity of this container
+	private final double meanGarbageDisposed; //mean garbage disposed
+	private final double stdGarbageDisposed; //standard deviation of garbage disposed
 	private double actualAmountGarbage; //amount of garbage present in container
 	private double predictedAmountGarbage; //amount of garbage for planning purposes
 	
@@ -19,7 +19,7 @@ public class Container {
 	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
 	 * @param std nonnegative integer that represent the standard deviation of the amount of garbage
 	 */
-	public Container(int capacity, int mean, int std) {
+	public Container(double capacity, double mean, double std) {
 		if(capacity<0||mean<0||std<0) {
 			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
 		}
@@ -33,7 +33,7 @@ public class Container {
 	 * @param capacity nonnegative value that represents the maximum capacity of a container
 	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
 	 */
-	public Container(int capacity, int mean) {
+	public Container(double capacity, double mean) {
 		if(capacity<0||mean<0) {
 			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
 		}
