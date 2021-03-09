@@ -130,7 +130,7 @@ public class Container {
 	public void update(double randomNumber) {
 		changePredictedAmountGarbage(meanGarbageDisposed);
 		double change=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
-		changeActualAmountGarbage(change<0?change:0);
+		changeActualAmountGarbage(change>0?change:0);
 	}
 	
 	
