@@ -89,6 +89,14 @@ public class Container {
 		}
 	}
 	
+	/**
+	 * Return capacity of container
+	 * @return double in cubes
+	 */
+	public double getCapacity() {
+		return capacity;
+	}
+	
 	//--------------Utility methods--------------------
 	/**
 	 * Update predicted and actual amount of garbage. the randomNumber should be a based on a
