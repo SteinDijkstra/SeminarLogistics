@@ -42,6 +42,13 @@ public class Graph {
 	public void addLocation(Location newLocation) {
 		locations.add(newLocation);
 	}
+	/**
+	 * add a list of locations to the model ONLY use for initialization
+	 * @param newLocation
+	 */
+	public void addLocation(List<Location> newLocation) {
+		locations.addAll(newLocation);
+	}
 	
 	/**
 	 * get all locations in the graph
