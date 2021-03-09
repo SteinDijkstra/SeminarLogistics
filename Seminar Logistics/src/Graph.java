@@ -44,7 +44,7 @@ public class Graph {
 	 * Set the seed of the random number generation (used in updating)
 	 * @param seed seed to use for random numbers
 	 */
-	public void setSeet(int seed) {
+	public void setSeed(int seed) {
 		random= new Random(seed);
 	}
 	
