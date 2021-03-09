@@ -3,9 +3,8 @@ import java.io.IOException;
 public class Main {
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
-		//testReadTravelTime();
-		int[][] travelTimes=Utils.readTravelTime("travel_time_matrix.csv");
-		System.out.print(testTriangleInequality(travelTimes));
+		Graph model= Utils.init();
+		System.out.println(model.getDistance(1, 2));
 	}
 	
 	public static void testReadTravelTime() throws NumberFormatException, IOException {
@@ -26,7 +25,6 @@ public class Main {
 					if(travelTimes[i][j]>travelTimes[i][k]+travelTimes[k][j]) {
 						System.out.println("from "+i+" to "+j+" takes "+ travelTimes[i][j]+" minutes");
 						System.out.println("from "+i+" to "+j+" via "+k+" takes "+ travelTimes[i][k]+" + "+travelTimes[k][j]+" minutes");
-						return false;
 					}
 				}
 			}
