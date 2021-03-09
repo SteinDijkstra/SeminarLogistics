@@ -31,10 +31,6 @@ public class Location {
 		this.plasticEmptyTime= plasticTime;
 	}
 	
-
-
-	
-
 	//--------------Setters and getters----------------
 	/**
 	 * Return time to empty plastic
