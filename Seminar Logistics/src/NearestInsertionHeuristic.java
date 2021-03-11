@@ -2,21 +2,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NearestInsertionHeuristic {
-	private final static Graph graph = null;
-	private final double alpha = 0.75;
-	private static List<Location> urgentPlastic = graph.getLocWithContianerOverBound(alpha, 1);
-	private static List<Location> urgentGlass = graph.getLocWithContianerOverBound(alpha, 0);
+	private final static Graph graph = null; //TODO:
+	private final static double alpha = 0.75;
+	private static List<Location> urgentPlastic = graph.getLocWithContianerOverBound(alpha, true);
+	private static List<Location> urgentGlass = graph.getLocWithContianerOverBound(alpha, false);
 	private static double availableCapacityPlastic = 0; //TODO: Moet nog goed worden bijgehouden
 	private static double availableCapacityGlass = 0; //TODO: Moet nog goed worden bijgehouden
 	private static double timeUsed;
-	private final static double timePlasticRecylcingFacility;
-	private final static double timeGlassRecylcingFacility;
+	private final static double timePlasticRecylcingFacility = 113;
+	private final static double timeGlassRecylcingFacility = 261;
 	private final static double swapTime = 20;
 	
 	public static void main(String[] args) {
 		
 		timeUsed = 0;
 		
+		//Calculate whether the containers can facilitate the wast which should be collected
 		double neededCapacityPlastic = 0;
 		double neededCapacityGlass = 0;
 		
@@ -41,6 +42,7 @@ public class NearestInsertionHeuristic {
 			timeUsed =+ timeGlassRecylcingFacility;
 		}
 		
+		//Adding the first location to a route
 		Location firstPlasticNode = null;
 		Location firstGlassNode = null;
 		List<Location> routePlastic = new ArrayList<>();
@@ -56,40 +58,43 @@ public class NearestInsertionHeuristic {
 		if(!urgentGlass.isEmpty()) {
 			firstGlassNode = getMaxGarbageLocation(urgentGlass, true);
 			timeUsed =+ 2*graph.getDistance(0, firstGlassNode.getIndex());
-		}
-		
-		
-			
+		}		
 	}
 
 
-
 	/**
-	 * Finds the location with the most predicted garbage of the locations in the given list
-	 * @param locations	The list
-	 * @param isPlastic
-	 * @return
+	 * Finds the location with the most predicted garbage percentage of the locations in the given list
+	 * @param locations	The list with locations there will be searched in
+	 * @param isPlastic	Whether or not there should be searched between the plastic cubes
+	 * @return			The location with the relative most filled cube(s)
 	 */
 	public static Location getMaxGarbageLocation(List<Location> locations, boolean isPlastic) {
 		if (isPlastic) {
 			double maxLevelPlastic = 0;
-			Location maxPlasticLocation;
+			Location maxPlasticLocation = null;
+			
 			for(Location i : locations) {
-				if (i.getPredictedPlastic() > maxLevelPlastic) {
-					maxLevelPlastic = i.getPredictedPlastic();
+				double newLevelPlastic = i.getPredictedPlastic()/i.getPlasticContainer().getCapacity();
+				if (newLevelPlastic > maxLevelPlastic) {
+					maxLevelPlastic = newLevelPlastic;
 					maxPlasticLocation = i;
 				}	
 			}
+			
 			return maxPlasticLocation;
+		
 		} else {
 			double maxLevelGlass = 0;
-			Location maxGlassLocation;
+			Location maxGlassLocation = null;
+			
 			for(Location i : locations) {
-				if (i.getPredictedGlass() > maxLevelGlass) {
-					maxLevelGlass = i.getPredictedGlass();
+				double newLevelGlass = i.getPredictedGlass()/i.getGlassContainer().getCapacity();
+				if (newLevelGlass > maxLevelGlass) {
+					maxLevelGlass = newLevelGlass;
 					maxGlassLocation = i;
 				}	
 			}
+			
 			return maxGlassLocation;
 		}
 	}
@@ -104,6 +109,7 @@ public class NearestInsertionHeuristic {
 	 * @return					the extra time this insertion takes
 	 */
 	public static int getExtraTime(int leftLocationTour, int rightLocationTour, int newLocation) {
-		return graph.getDistance(leftLocationTour, newLocation) +  graph.getDistance(newLocation, rightLocationTour) - graph.getDistance(leftLocationTour, rightLocationTour) ;
+		return graph.getDistance(leftLocationTour, newLocation) +  graph.getDistance(newLocation, rightLocationTour) 
+		- graph.getDistance(leftLocationTour, rightLocationTour) ;
 	}
 }
