@@ -92,6 +92,10 @@ public class Graph {
 	}
 	
 	//--------------Utility methods--------------------
+	/**
+	 * Counts the total number of overflow locations
+	 * @return the total number of overflow locations
+	 */
 	public int getAmountOverflow() {
 		int sum =0;
 		for(Location loc:locations) {
@@ -101,7 +105,39 @@ public class Graph {
 		return sum;
 	}
 	
+	/**
+	 * Initializes the garbage bins
+	 */
+	public void initGarbage() {
+		for(Location loc:locations) {
+			//Set plastic value
+			Container plastic= loc.getPlasticContainer();
+			double amountPlastic= plastic.getCapacity()*random.nextDouble();
+			plastic.setActualAmountGarbage(amountPlastic);
+			plastic.setPredictedAmountGarbage(amountPlastic);//TODO exact amount not known.
+			
+			//Set glass values
+			Container glass= loc.getGlassContainer();
+			double  amountGlass= glass.getCapacity()*random.nextDouble();
+			glass.setActualAmountGarbage(amountGlass);
+			glass.setPredictedAmountGarbage(amountGlass);
+		}
+	}
 	
-	//--------------Other methods----------------------
+	public void updateGarbage() {
+		for(Location loc:locations) {
+			//update plastic value
+			Container plastic= loc.getPlasticContainer();
+			double randomNormal=random.nextGaussian();
+			plastic.update(randomNormal);
+			
+			//Set glass values
+			Container glass= loc.getGlassContainer();
+			randomNormal=random.nextGaussian();
+			glass.update(randomNormal);
+		}
+	}
+	//--------------Solution/heuristic methods----------------------
+	
 
 }
