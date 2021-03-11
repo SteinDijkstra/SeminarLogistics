@@ -124,6 +124,9 @@ public class Graph {
 		}
 	}
 	
+	/**
+	 * update the garbage at the end of the day 
+	 */
 	public void updateGarbage() {
 		for(Location loc:locations) {
 			//update plastic value
@@ -138,6 +141,27 @@ public class Graph {
 		}
 	}
 	//--------------Solution/heuristic methods----------------------
-	
+	/**
+	 * Returns a list of locations where the predicted garbage of container of type isPlastic 
+	 * is larger than percentage times the max capacity
+	 * @param percentage percentage to set the bound to number between 0 and 1
+	 * @param isPlastic true if plastic 
+	 * @return
+	 */
+	public List<Location> getLocWithContianerOverBound(double percentage, boolean isPlastic){
+		List<Location> result= new ArrayList<>();
+		for(Location loc:locations) {
+			Container container;
+			if(isPlastic) {
+				container=loc.getPlasticContainer();
+			} else {
+				container=loc.getGlassContainer();
+			}
+			if(container.getPredictedAmountGarbage()>percentage*container.getCapacity()) {
+				result.add(loc);
+			}
+		}
+		return result;
+	}
 
 }
