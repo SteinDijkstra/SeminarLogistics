@@ -6,10 +6,12 @@ public class Main {
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		Graph model= Utils.init();
 		model.initGarbage();
-		model.updateGarbage();
-		List<Location> predictedOverflowList= model.getLocWithContianerOverBound(1, true);
-		for(Location loc:predictedOverflowList) {
-			System.out.println(loc);
+		int prevDay=0;
+		for(int i=0;i<30;i++) {
+			System.out.println("on day "+i+" we have "+(model.getAmountOverflow()-prevDay)+"new overflows");
+			prevDay=model.getAmountOverflow();
+			model.updateGarbage();
+			
 		}
 		
 	
