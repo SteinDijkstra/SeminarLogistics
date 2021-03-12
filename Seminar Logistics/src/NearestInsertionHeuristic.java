@@ -1,11 +1,15 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Marian
+ *
+ */
 public class NearestInsertionHeuristic {
 	private final static Graph graph = null; //TODO:
 	private final static double alpha = 0.75;
-	private static List<Location> urgentPlastic = graph.getLocWithContianerOverBound(alpha, true);
-	private static List<Location> urgentGlass = graph.getLocWithContianerOverBound(alpha, false);
+	private static List<Location> urgentPlastic = graph.getLocWithContainerOverBound(alpha, true);
+	private static List<Location> urgentGlass = graph.getLocWithContainerOverBound(alpha, false);
 	private static double availableCapacityPlastic = 0; //TODO: Moet nog goed worden bijgehouden
 	private static double availableCapacityGlass = 0; //TODO: Moet nog goed worden bijgehouden
 	private static double timeUsed;
