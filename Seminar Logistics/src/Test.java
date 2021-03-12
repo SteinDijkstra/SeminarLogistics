@@ -24,6 +24,7 @@ public class Test {
 						System.out.println("from " + i + " to " + j + " takes " + travelTimes[i][j] + " minutes");
 						System.out.println("from " + i + " to " + j + " via " + k + " takes " + travelTimes[i][k] 
 								+ " + " + travelTimes[k][j] + " minutes");
+						return false;
 					}
 				}
 			}

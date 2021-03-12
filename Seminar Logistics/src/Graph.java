@@ -172,6 +172,8 @@ public class Graph {
 			glass.update(randomNormal);
 		}
 	}
+	
+
 	//--------------Solution/heuristic methods----------------------
 	/**
 	 * Returns a list of locations where the predicted garbage of container of type isPlastic 
