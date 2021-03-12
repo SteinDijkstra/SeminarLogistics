@@ -1,11 +1,20 @@
+import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
-	public static void main(String[] args) {
-		System.out.println("hello world, again!");
-		System.out.println("hello back!");
-		System.out.println("Hello!");
-		System.out.println("no stop!");
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		Graph model= Utils.init();
+		model.initGarbage();
+		model.updateGarbage();
+		List<Location> predictedOverflowList= model.getLocWithContianerOverBound(1, true);
+		for(Location loc:predictedOverflowList) {
+			System.out.println(loc);
+		}
+		
+	
 	}
+	
+
 
 }

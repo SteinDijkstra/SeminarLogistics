@@ -6,9 +6,9 @@
  *
  */
 public class Container {
-	private final int capacity; //max capacity of this container
-	private final int meanGarbageDisposed; //mean garbage disposed
-	private final int stdGarbageDisposed; //standard deviation of garbage disposed
+	private final double capacity; //max capacity of this container
+	private final double meanGarbageDisposed; //mean garbage disposed
+	private final double stdGarbageDisposed; //standard deviation of garbage disposed
 	private double actualAmountGarbage; //amount of garbage present in container
 	private double predictedAmountGarbage; //amount of garbage for planning purposes
 	
@@ -19,7 +19,7 @@ public class Container {
 	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
 	 * @param std nonnegative integer that represent the standard deviation of the amount of garbage
 	 */
-	public Container(int capacity, int mean, int std) {
+	public Container(double capacity, double mean, double std) {
 		if(capacity<0||mean<0||std<0) {
 			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
 		}
@@ -33,7 +33,7 @@ public class Container {
 	 * @param capacity nonnegative value that represents the maximum capacity of a container
 	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
 	 */
-	public Container(int capacity, int mean) {
+	public Container(double capacity, double mean) {
 		if(capacity<0||mean<0) {
 			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
 		}
@@ -56,19 +56,28 @@ public class Container {
 	 * Changes the actual amount of garbage by the specified amount
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
 	 * If the new value would lead to a negative amount of garbage an exception is thrown
-	 * if more garbage is added than the capacity the value is set equal to the capacity
 	 * @param change double value that specifies the change
 	 */
 	public void changeActualAmountGarbage(double change) {
 		if(actualAmountGarbage+change<0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
-		} else if(actualAmountGarbage+change>capacity) {
-			actualAmountGarbage=capacity;
 		} else {
 			actualAmountGarbage+=change;
 		}
 	}
 	
+	/**
+	 * set the actual amount of garbage equal to a certain number that is non negative
+	 * @param amount double value that is in the garbage bin
+	 */
+	public void setActualAmountGarbage(double amount) {
+		if(amount<0) {
+			throw new IllegalArgumentException("amount of garbage can not be negative");
+		} else {
+			actualAmountGarbage= amount;
+		}
+	}
+
 	/**
 	 * Returns the predicted amount of garbage present in the container
 	 * DO NOT USE FOR EMPTYING AND OVERFLOW STATISTIC PURPOSES
@@ -82,34 +91,54 @@ public class Container {
 	 * Changes the predicted amount of garbage by the specified amount
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
 	 * If the new value would lead to a negative amount of garbage an exception is thrown
-	 * if more garbage is added than the capacity the value is set equal to the capacity
 	 * @param change double value that specifies the change
 	 */
 	public void changePredictedAmountGarbage(double change) {
 		if(predictedAmountGarbage+change<0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
-		} else if(predictedAmountGarbage+change>capacity) {
-			predictedAmountGarbage=capacity;
 		} else {
 			predictedAmountGarbage+=change;
 		}
 	}
 	
+	/**
+	 * set the predicted amount of garbage equal to a certain number that is non negative
+	 * @param amount double value that is in the garbage bin
+	 */
+	public void setPredictedAmountGarbage(double amount) {
+		if(amount<0) {
+			throw new IllegalArgumentException("amount of garbage can not be negative");
+		} else {
+			predictedAmountGarbage= amount;
+		}
+	}
+	
+	/**
+	 * Return capacity of container
+	 * @return double in cubes
+	 */
+	public double getCapacity() {
+		return capacity;
+	}
+	
 	//--------------Utility methods--------------------
 	/**
-	 * Update predictedn and actual amount of garbage. the randomNumber should be a based on a
+	 * Update predicted and actual amount of garbage. the randomNumber should be a based on a
 	 * standard normal number s.t. the additional garbage is distributed by N(mean, std^2)
 	 * @param randomNumber a double gotton from a N(0,1) variable.
 	 */
 	public void update(double randomNumber) {
-		predictedAmountGarbage+=meanGarbageDisposed;
-		// TODO check what should happen if addition is negative
-		actualAmountGarbage+=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
+		changePredictedAmountGarbage(meanGarbageDisposed);
+		double change=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
+		changeActualAmountGarbage(change>0?change:0);
 	}
 	
 	
 	//--------------Other methods----------------------
-	
+	@Override
+	public String toString() {
+		return "Actual amount: "+this.actualAmountGarbage+" Predicted amount: "+this.predictedAmountGarbage+" Max amount: "+this.capacity;
+	}
 	
 	
 }
