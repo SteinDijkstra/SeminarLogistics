@@ -8,7 +8,7 @@ public class Main {
 		model.initGarbage();
 		int prevDay=0;
 		for(int i=0;i<30;i++) {
-			System.out.println("on day "+i+" we have "+(model.getAmountOverflow()-prevDay)+"new overflows");
+			System.out.println("on day "+i+" we have "+(model.getAmountOverflow()-prevDay)+" new overflows");
 			prevDay=model.getAmountOverflow();
 			model.updateGarbage();
 			
