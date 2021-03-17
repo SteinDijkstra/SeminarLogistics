@@ -6,7 +6,7 @@ import java.util.List;
  *
  */
 public class NearestInsertionHeuristic {
-	private final static Graph graph = null; //TODO:
+	private final static Graph graph = null; //TODO:initizalize right graph
 	private final static double alpha = 0.75;
 	private static List<Location> urgentPlastic = graph.getLocWithContainerOverBound(alpha, true);
 	private static List<Location> urgentGlass = graph.getLocWithContainerOverBound(alpha, false);
@@ -16,28 +16,28 @@ public class NearestInsertionHeuristic {
 	private final static double timePlasticRecylcingFacility = 113;
 	private final static double timeGlassRecylcingFacility = 261;
 	private final static double swapTime = 20;
-	
+
 	public static void main(String[] args) {
-		
+
 		timeUsed = 0;
-		
+
 		//Calculate whether the containers can facilitate the wast which should be collected
 		double neededCapacityPlastic = 0;
 		double neededCapacityGlass = 0;
-		
+
 		for(Location i:urgentPlastic) {
 			neededCapacityPlastic =+ i.getPredictedPlastic();
 		}
-		
+
 		for(Location i:urgentGlass) {
 			neededCapacityGlass =+ i.getPredictedGlass();
 		}
-		
+
 		//TODO: moet er nog een margin bij?
 		if(availableCapacityPlastic < neededCapacityPlastic) {
 			timeUsed =+ timePlasticRecylcingFacility;
 		}
-		
+
 		//TODO: moet er nog een margin bij?
 		if(availableCapacityGlass < neededCapacityGlass) {
 			if(timeUsed != 0) {
@@ -45,13 +45,13 @@ public class NearestInsertionHeuristic {
 			}
 			timeUsed =+ timeGlassRecylcingFacility;
 		}
-		
+
 		//Adding the first location to a route
 		Location firstPlasticNode = null;
 		Location firstGlassNode = null;
 		List<Location> routePlastic = new ArrayList<>();
 		List<Location> routeGlass = new ArrayList<>();
-		
+
 		if(!urgentPlastic.isEmpty()) {
 			firstPlasticNode = getMaxGarbageLocation(urgentPlastic, true);
 			timeUsed =+ 2*graph.getDistance(0, firstPlasticNode.getIndex());
@@ -76,7 +76,7 @@ public class NearestInsertionHeuristic {
 		if (isPlastic) {
 			double maxLevelPlastic = 0;
 			Location maxPlasticLocation = null;
-			
+
 			for(Location i : locations) {
 				double newLevelPlastic = i.getPredictedPlastic()/i.getPlasticContainer().getCapacity();
 				if (newLevelPlastic > maxLevelPlastic) {
@@ -84,13 +84,13 @@ public class NearestInsertionHeuristic {
 					maxPlasticLocation = i;
 				}	
 			}
-			
+
 			return maxPlasticLocation;
-		
+
 		} else {
 			double maxLevelGlass = 0;
 			Location maxGlassLocation = null;
-			
+
 			for(Location i : locations) {
 				double newLevelGlass = i.getPredictedGlass()/i.getGlassContainer().getCapacity();
 				if (newLevelGlass > maxLevelGlass) {
@@ -98,12 +98,11 @@ public class NearestInsertionHeuristic {
 					maxGlassLocation = i;
 				}	
 			}
-			
 			return maxGlassLocation;
 		}
 	}
 
-	
+
 	/**
 	 * Calculates the time which is needed to insert the new location between the 
 	 * left location and the right location.
