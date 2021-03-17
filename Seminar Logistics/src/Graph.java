@@ -32,7 +32,7 @@ public class Graph {
 	public void addLocation(Location newLocation) {
 		locations.add(newLocation);
 	}
-	
+
 	/**
 	 * add a list of locations to the model ONLY use for initialization
 	 * @param newLocation a list of locations corresponding to the distance matrix
@@ -173,7 +173,7 @@ public class Graph {
 			glass.update(randomNormal);
 		}
 	}
-	
+
 
 	//--------------Solution/heuristic methods----------------------
 	/**

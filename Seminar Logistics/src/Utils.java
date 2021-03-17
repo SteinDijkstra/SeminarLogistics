@@ -73,7 +73,7 @@ public class Utils {
 			System.out.print(loc.getIndex() + ", ");
 		}
 	}
-	
+
 	public static void solveTriangleInequality(String travelTime,String outputFile) throws NumberFormatException, IOException {
 		int[][]distances=readTravelTime(travelTime);
 		int[][]newDistances=new int[distances.length][distances.length];
@@ -91,7 +91,7 @@ public class Utils {
 		}
 		writeFile(newDistances,outputFile);
 	}
-	
+
 	public static void writeFile(int[][] matrix,String filename) throws IOException {
 		try(BufferedWriter br=new BufferedWriter(new FileWriter(new File(filename)))){
 			br.write(""+matrix.length);
