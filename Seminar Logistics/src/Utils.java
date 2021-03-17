@@ -10,10 +10,6 @@ import java.util.List;
  *
  */
 public class Utils {
-	/* Marja vraagt: wat is het nut van deze methode? Direct inputargumenten in andere
-	 * init methode? De strings ook liever opslaan als string in main, zodat ze makkelijk
-	 * aan te passen zijn. Is dat goed?
-	 */
 	public static Graph init() throws NumberFormatException, IOException {
 		return init("travel_time_matrix.csv","Deposit_data.csv");
 	}

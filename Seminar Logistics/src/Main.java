@@ -9,7 +9,6 @@ public class Main {
 		model.updateGarbage();
 		
 		List<Location> predictedOverflowList = model.getLocWithContainerOverBound(1, true);
-		//TODO: call printing method from another class
 		Utils.printLocations(predictedOverflowList);
 	}
 }

@@ -32,6 +32,7 @@ public class Graph {
 	public void addLocation(Location newLocation) {
 		locations.add(newLocation);
 	}
+	
 	/**
 	 * add a list of locations to the model ONLY use for initialization
 	 * @param newLocation a list of locations corresponding to the distance matrix
@@ -52,21 +53,21 @@ public class Graph {
 	 * @param seed seed to use for random numbers
 	 */
 	public void setSeed(int seed) {
-		random= new Random(seed);
+		random = new Random(seed);
 	}
 
 	/**
-	 * get all locations in the graph, including deposit
+	 * get all locations in the graph, including depot
 	 * @return list of all locations in graph
 	 */
 	public List<Location> getLocations(){
 		return locations;
 	}
 
-	/** get all locations in the graph, excluding deposit
-	 * @return list of all locations, but not deposit
+	/** get all locations in the graph, excluding depot
+	 * @return list of all locations, but not depot
 	 */
-	public List<Location> getLocationsExceptDeposit() {
+	public List<Location> getLocationsExceptDepot() {
 		List<Location> temp = getLocations();
 		temp.remove(0);
 		return temp;
@@ -126,7 +127,7 @@ public class Graph {
 	 */
 	public int getAmountOverflow() {
 		int sum = 0;
-		for(Location loc:locations) {
+		for(Location loc : locations) {
 			if(loc.plasticOverflow()) {
 				sum++;
 			}

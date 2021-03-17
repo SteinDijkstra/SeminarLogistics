@@ -101,7 +101,7 @@ public class Location {
 		return locationNumber;
 	}
 	//--------------Utility methods--------------------
-	/**
+	/** DO NOT USE FOR PLANNING PURPOSES
 	 * check if plastic is overflowing
 	 * @return true if current amount is more than the capacity
 	 */
@@ -109,7 +109,7 @@ public class Location {
 		return plasticContainer.getActualAmountGarbage() > plasticContainer.getCapacity();
 	}
 	
-	/**
+	/** DO NOT USE FOR PLANNING PURPOSES
 	 * Check if paper is overflowing
 	 * @return true if current amount is more than the capacity
 	 */
@@ -162,7 +162,7 @@ public class Location {
 			plasticContainer.changeActualAmountGarbage(-maxEmpty);
 			plasticContainer.setPredictedAmountGarbage(plasticContainer.getActualAmountGarbage());//TODO how accurate can this be estimated
 			return maxEmpty;
-		} else { //all garbaged can be collected
+		} else { //all garbage can be collected
 			double amountEmptied=plasticContainer.getActualAmountGarbage();
 			plasticContainer.setActualAmountGarbage(0);
 			plasticContainer.setPredictedAmountGarbage(0);
@@ -171,7 +171,7 @@ public class Location {
 	}
 	
 	/**
-	 * Empty the paper container where the max additional capacities specified
+	 * Empty the glass container where the max additional capacities specified
 	 * @param maxEmpty leftover capacity of the truck
 	 * @return the actual amount emptied
 	 */

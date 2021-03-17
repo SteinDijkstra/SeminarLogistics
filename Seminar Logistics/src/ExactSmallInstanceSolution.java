@@ -8,8 +8,9 @@ import java.util.List;
  */
 public class ExactSmallInstanceSolution {
 	private final static Graph graph = null; // TODO initialize right graph
+	private static List<Location> bestRoute = null;
 	public static void main(String[] args) {
-		List<Location> allLocations = graph.getLocationsExceptDeposit();
+		List<Location> allLocations = graph.getLocationsExceptDepot();
 		List<List<Location>> allRoutes = null;
 		allRoutes = enumerateRoutes(allLocations, 0, allRoutes);
 		List<Integer> routeLengths = findRouteLengths(allRoutes);
