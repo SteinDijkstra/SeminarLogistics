@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,44 +12,8 @@ import java.util.List;
  *
  */
 public class Utils {
-	/* Marja vraagt: wat is het nut van deze methode? Direct inputargumenten in andere
-	 * init methode? De strings ook liever opslaan als string in main, zodat ze makkelijk
-	 * aan te passen zijn. Is dat goed?
-	 */
 	public static Graph init() throws NumberFormatException, IOException {
-		return init("travel_time_matrix.csv","Deposit_data.csv");
-	}
-
-	public static Graph initSubgraph(String travelTime, String depositData, List<Integer> locationNumbers) throws NumberFormatException, IOException {
-		// First construct a smaller distance matrix
-		// Deposit must always be included, otherwise throw exception.
-		if(!locationNumbers.contains(0)) {
-			throw new IllegalArgumentException("Please always add the deposit, number 0");
-		}
-		// Two indices i and j keep track of where we are, filling the distance matrix.
-		int i = 0; //row index
-		int j = 0; //column index
-		int size = locationNumbers.size();
-		int[][] fullDistances = readTravelTime(travelTime);
-		int[][] distances = new int[size + 1][size + 1];
-		//TODO: check if matrix is filled in right way
-		for(int k : locationNumbers) {
-			for(int l : locationNumbers) {
-				distances[i][j] = fullDistances[k][l];
-				j++;
-			}
-			i++;
-		}
-		Graph graph = new Graph(distances);
-		
-		// Secondly, add right locations to the location list
-		List<Location> fullLocations = readLocations(depositData, graph);
-		for(Location l : fullLocations) {
-			if(locationNumbers.contains(l.getIndex())) {
-				graph.addLocation(l);
-			}
-		}
-		return graph;
+		return init("updated2_travel_time_matrix.csv","Deposit_data.csv");
 	}
 
 	public static Graph init(String travelTime, String depositData) throws NumberFormatException, IOException {
@@ -105,6 +71,38 @@ public class Utils {
 	public static void printLocations(List<Location> locations) {
 		for(Location loc : locations) {
 			System.out.print(loc.getIndex() + ", ");
+		}
+	}
+
+	public static void solveTriangleInequality(String travelTime,String outputFile) throws NumberFormatException, IOException {
+		int[][]distances=readTravelTime(travelTime);
+		int[][]newDistances=new int[distances.length][distances.length];
+		int minDistance;
+		for(int i = 0; i < distances.length; i++) {
+			for(int j = 0; j < distances.length; j++) {
+				minDistance=distances[i][j];
+				for(int k = 0; k < distances.length; k++) {
+					if(minDistance > distances[i][k] + distances[k][j]) {
+						minDistance=distances[i][k] + distances[k][j];
+					}
+				}
+				newDistances[i][j]=minDistance;
+			}
+		}
+		writeFile(newDistances,outputFile);
+	}
+
+	public static void writeFile(int[][] matrix,String filename) throws IOException {
+		try(BufferedWriter br=new BufferedWriter(new FileWriter(new File(filename)))){
+			br.write(""+matrix.length);
+			br.newLine();
+			for(int[] row:matrix) {
+				br.write(""+row[0]);
+				for(int i=1;i<row.length;i++) {
+					br.write(";"+row[i]);
+				}
+				br.newLine();
+			}
 		}
 	}
 }
