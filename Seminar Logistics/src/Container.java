@@ -2,7 +2,7 @@
  * Data structure that represents a Container keeps track of the actual amount of garbage as well
  * as the predicted amount. Also is defined by a maximum capicity, mean garbage disposed and the std
  * of the disposed garbage.
- * @author steindijkstra
+ * @author Stein
  *
  */
 public class Container {
@@ -20,12 +20,12 @@ public class Container {
 	 * @param std nonnegative integer that represent the standard deviation of the amount of garbage
 	 */
 	public Container(double capacity, double mean, double std) {
-		if(capacity<0||mean<0||std<0) {
+		if(capacity < 0 || mean < 0 || std < 0) {
 			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
 		}
-		this.capacity=capacity;
-		meanGarbageDisposed=mean;
-		stdGarbageDisposed=std;
+		this.capacity = capacity;
+		meanGarbageDisposed = mean;
+		stdGarbageDisposed = std;
 	}
 	
 	/**
@@ -34,12 +34,12 @@ public class Container {
 	 * @param mean nonnegative integer that represent the mean amount of garbage that is disposed each day
 	 */
 	public Container(double capacity, double mean) {
-		if(capacity<0||mean<0) {
+		if(capacity < 0 || mean < 0) {
 			throw new IllegalArgumentException("Please enter nonnegative arguments for this Container");
 		}
-		this.capacity=capacity;
-		meanGarbageDisposed=mean;
-		stdGarbageDisposed=0;
+		this.capacity = capacity;
+		meanGarbageDisposed = mean;
+		stdGarbageDisposed = 0;
 	}
 	
 	//--------------Setters and getters----------------
@@ -59,10 +59,10 @@ public class Container {
 	 * @param change double value that specifies the change
 	 */
 	public void changeActualAmountGarbage(double change) {
-		if(actualAmountGarbage+change<0) {
+		if(actualAmountGarbage + change < 0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
 		} else {
-			actualAmountGarbage+=change;
+			actualAmountGarbage += change;
 		}
 	}
 	
@@ -71,10 +71,10 @@ public class Container {
 	 * @param amount double value that is in the garbage bin
 	 */
 	public void setActualAmountGarbage(double amount) {
-		if(amount<0) {
+		if(amount < 0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
 		} else {
-			actualAmountGarbage= amount;
+			actualAmountGarbage = amount;
 		}
 	}
 
@@ -94,10 +94,10 @@ public class Container {
 	 * @param change double value that specifies the change
 	 */
 	public void changePredictedAmountGarbage(double change) {
-		if(predictedAmountGarbage+change<0) {
+		if(predictedAmountGarbage + change < 0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
 		} else {
-			predictedAmountGarbage+=change;
+			predictedAmountGarbage += change;
 		}
 	}
 	
@@ -106,10 +106,10 @@ public class Container {
 	 * @param amount double value that is in the garbage bin
 	 */
 	public void setPredictedAmountGarbage(double amount) {
-		if(amount<0) {
+		if(amount < 0) {
 			throw new IllegalArgumentException("amount of garbage can not be negative");
 		} else {
-			predictedAmountGarbage= amount;
+			predictedAmountGarbage = amount;
 		}
 	}
 	
@@ -129,16 +129,15 @@ public class Container {
 	 */
 	public void update(double randomNumber) {
 		changePredictedAmountGarbage(meanGarbageDisposed);
-		double change=meanGarbageDisposed+randomNumber*stdGarbageDisposed;
-		changeActualAmountGarbage(change>0?change:0);
+		double change = meanGarbageDisposed + randomNumber * stdGarbageDisposed;
+		changeActualAmountGarbage(change > 0 ? change : 0);
 	}
 	
 	
 	//--------------Other methods----------------------
 	@Override
 	public String toString() {
-		return "Actual amount: "+this.actualAmountGarbage+" Predicted amount: "+this.predictedAmountGarbage+" Max amount: "+this.capacity;
+		return "Actual amount: " + this.actualAmountGarbage + " Predicted amount: " + 
+				this.predictedAmountGarbage + " Max amount: " + this.capacity;
 	}
-	
-	
 }

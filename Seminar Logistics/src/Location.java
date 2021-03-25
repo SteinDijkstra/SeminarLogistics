@@ -1,7 +1,7 @@
 /**
  * This class represents an AAP (aparte afvalpunt) and contains a plastic and glass container
  * that can have a different max capacities and other properties.   
- * @author steindijkstra
+ * @author Stein
  *
  */
 public class Location {
@@ -21,14 +21,14 @@ public class Location {
 	 * @param plastic a plastic container
 	 */
 	public Location(Graph graph,int locationNumber, Container glass, Container plastic, int glassTime, int plasticTime) {
-		this.graph=graph;
-		this.locationNumber=locationNumber;
-		this.glassContainer=glass;
-		this.plasticContainer=plastic;
-		this.glassEmptyTime=glassTime;
-		this.plasticEmptyTime= plasticTime;
+		this.graph = graph;
+		this.locationNumber = locationNumber;
+		this.glassContainer = glass;
+		this.plasticContainer = plastic;
+		this.glassEmptyTime = glassTime;
+		this.plasticEmptyTime = plasticTime;
 	}
-	
+
 	//--------------Setters and getters----------------
 	/**
 	 * Return time to empty plastic
@@ -37,15 +37,15 @@ public class Location {
 	public int getPlasticEmptyTime() {
 		return plasticEmptyTime;
 	}
-	
+
 	/**
 	 * Return time to empty glass
 	 * @return integer amount of time
 	 */
-	public int getGlassEmpyTime() {
+	public int getGlassEmptyTime() {
 		return glassEmptyTime;
 	}
-	
+
 	/**
 	 * Returns predicted amount of glass
 	 * @return double in cubes
@@ -53,7 +53,7 @@ public class Location {
 	public double getPredictedGlass() {
 		return glassContainer.getPredictedAmountGarbage();
 	}
-	
+
 	/**
 	 * Returns actual amount of glass
 	 * @return double in cubes
@@ -61,7 +61,7 @@ public class Location {
 	public double getActualGlass() {
 		return glassContainer.getActualAmountGarbage();
 	}
-	
+
 	/**
 	 * Returns predicted amount of plastic
 	 * @return double in cubes
@@ -69,7 +69,7 @@ public class Location {
 	public double getPredictedPlastic() {
 		return plasticContainer.getPredictedAmountGarbage();
 	}
-	
+
 	/**
 	 * Returns actual amount of plastic
 	 * @return double in cubes
@@ -77,7 +77,7 @@ public class Location {
 	public double getActualPlastic() {
 		return plasticContainer.getActualAmountGarbage();
 	}
-	
+
 	/**
 	 * Returns the glass container
 	 * @return a container object
@@ -92,7 +92,7 @@ public class Location {
 	public Container getPlasticContainer() {
 		return plasticContainer;
 	}
-	
+
 	/**
 	 * Returns index
 	 * @return Integer
@@ -101,22 +101,22 @@ public class Location {
 		return locationNumber;
 	}
 	//--------------Utility methods--------------------
-	/**
+	/** DO NOT USE FOR PLANNING PURPOSES
 	 * check if plastic is overflowing
 	 * @return true if current amount is more than the capacity
 	 */
 	public boolean plasticOverflow() {
-		return plasticContainer.getActualAmountGarbage()>plasticContainer.getCapacity();
+		return plasticContainer.getActualAmountGarbage() > plasticContainer.getCapacity();
 	}
-	
-	/**
+
+	/** DO NOT USE FOR PLANNING PURPOSES
 	 * Check if paper is overflowing
 	 * @return true if current amount is more than the capacity
 	 */
 	public boolean glassOverflow() {
-		return glassContainer.getActualAmountGarbage()>glassContainer.getCapacity();
+		return glassContainer.getActualAmountGarbage() > glassContainer.getCapacity();
 	}
-	
+
 	/**
 	 * Return the distance to all neighbors
 	 * @return integer array with distances
@@ -124,16 +124,16 @@ public class Location {
 	public int[] getDistanceNeighbours() {
 		return graph.getDistanceNeighbours(this.locationNumber);
 	}
-	
+
 	/**
 	 * Return a double array with the predicted plastic all neighbors have
 	 * @return a double array with plastic amount of neighbors
 	 */
 	public double[] getPlasticAmountNeighbours() {
 		double[] result = new double[graph.getNumLocations()];
-		int index=0;
-		for(Location neighbour:graph.getLocations()) {
-			result[index]=neighbour.getPredictedPlastic();
+		int index = 0;
+		for(Location neighbour : graph.getLocations()) {
+			result[index] = neighbour.getPredictedPlastic();
 			index++;
 		}
 		return result;
@@ -144,44 +144,45 @@ public class Location {
 	 */
 	public double[] getGlassAmountNeighbours() {
 		double[] result = new double[graph.getNumLocations()];
-		int index=0;
+		int index = 0;
 		for(Location neighbour:graph.getLocations()) {
-			result[index]=neighbour.getPredictedGlass();
+			result[index] = neighbour.getPredictedGlass();
 			index++;
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Empty the plastic container where the max additional capacity can be specified
 	 * @param maxEmpty leftover capacity of the truck
 	 * @return the actual amount emptied
 	 */
 	public double emptyPlastic(double maxEmpty) {
-		if(plasticContainer.getActualAmountGarbage()>maxEmpty) {//not all garbage can be collected
+		if(plasticContainer.getActualAmountGarbage() > maxEmpty) {//not all garbage can be collected
 			plasticContainer.changeActualAmountGarbage(-maxEmpty);
 			plasticContainer.setPredictedAmountGarbage(plasticContainer.getActualAmountGarbage());//TODO how accurate can this be estimated
 			return maxEmpty;
-		} else { //all garbaged can be collected
+		} else { //all garbage can be collected
 			double amountEmptied=plasticContainer.getActualAmountGarbage();
 			plasticContainer.setActualAmountGarbage(0);
 			plasticContainer.setPredictedAmountGarbage(0);
 			return amountEmptied;
 		}
 	}
-	
+
 	/**
-	 * Empty the paper container where the max additional capacities specified
+	 * Empty the glass container where the max additional capacities specified
 	 * @param maxEmpty leftover capacity of the truck
 	 * @return the actual amount emptied
 	 */
+	//TODO: Check if all garbage is collected, also outside container in case of overflow.
 	public double emptyGlass(double maxEmpty) {
-		if(glassContainer.getActualAmountGarbage()>maxEmpty) {//not all garbage can be collected
+		if(glassContainer.getActualAmountGarbage() > maxEmpty) {//not all garbage can be collected
 			glassContainer.changeActualAmountGarbage(-maxEmpty);
 			glassContainer.setPredictedAmountGarbage(glassContainer.getActualAmountGarbage());//TODO how accurate can this be estimated
 			return maxEmpty;
 		} else { //all garbaged can be collected
-			double amountEmptied=plasticContainer.getActualAmountGarbage();
+			double amountEmptied = plasticContainer.getActualAmountGarbage();
 			glassContainer.setActualAmountGarbage(0);
 			glassContainer.setPredictedAmountGarbage(0);
 			return amountEmptied;
@@ -190,8 +191,8 @@ public class Location {
 	//--------------Other methods----------------------
 	@Override
 	public String toString() {
-		String description= "Location "+this.locationNumber+"\n Plastic: "+plasticContainer.toString();
-		description+="\n Glass: "+glassContainer.toString();
+		String description = "Location "+this.locationNumber+"\n Plastic: "+plasticContainer.toString();
+		description += "\n Glass: "+glassContainer.toString();
 		return description;
 	}
 }
