@@ -88,10 +88,10 @@ public class CplexModel {
 					if (i != j) {
 						obj = cplex.sum(cplex.prod(graph.getDistance(i, j), yp[i][j][t]), obj);
 						obj = cplex.sum(cplex.prod(graph.getDistance(i, j), yg[i][j][t]), obj);
-					}
-					if (i != 0 && j != 0) { // TODO: y fout
-						obj = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(), yp[0][j][t]), obj);
-						obj = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(), yg[0][j][t]), obj);
+						if (i != 0) {
+							obj = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(), yp[i][j][t]), obj);
+							obj = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(), yg[i][j][t]), obj);
+						}
 					}
 				}
 			}
@@ -156,9 +156,9 @@ public class CplexModel {
 		for (int t=0; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr exprp1 = cplex.sum(capacityTruck, cplex.prod(-1, qp[i][0][t]));
-				IloNumExpr exprp2 = cplex.sum(M, cplex.prod(-1, gp[i][t]));
+				IloNumExpr exprp2 = cplex.sum(M, cplex.prod(-M, gp[i][t]));
 				IloNumExpr exprg1 = cplex.sum(capacityTruck, cplex.prod(-1, qg[i][0][t]));
-				IloNumExpr exprg2 = cplex.sum(M, cplex.prod(-1, gg[i][t]));
+				IloNumExpr exprg2 = cplex.sum(M, cplex.prod(-M, gg[i][t]));
 				cplex.addLe(exprp1, exprp2);
 				cplex.addLe(exprg1, exprg2);
 			}
@@ -329,35 +329,26 @@ public class CplexModel {
 			cplex.addLe(cp[t],expr19a);
 
 			IloNumExpr expr19b = cplex.constant(0.0);
-			expr19b = cplex.prod(capacityTruck,cplex.sum(1,cplex.prod(-1, etap[t])));
-			cplex.addLe(cp[t],expr19b);
+			expr19b = cplex.prod(capacityTruck,cplex.sum(1,cplex.prod(-1, etag[t])));
+			cplex.addLe(cg[t],expr19b);
 		}
 
 		for(int t=1; t<timeHorizon; t++) {
 			IloNumExpr expr20a = cplex.constant(0.0);
+			IloNumExpr expr20b = cplex.constant(0.0);
+			IloNumExpr expr21a = cplex.constant(0.0);
+			IloNumExpr expr21b = cplex.constant(0.0);
 			for(int i=0; i<nodes; i++) {
 				expr20a = cplex.sum(qp[i][0][t-1],expr20a);	
-			}
-			cplex.addLe(cp[t],expr20a);
-
-			IloNumExpr expr20b = cplex.constant(0.0);
-			for(int i=1; i<nodes; i++) {
-				expr20b = cplex.sum(qg[i][0][t-1],expr20b);	
-			}
-			cplex.addLe(cg[t],expr20b);
-
-			IloNumExpr expr21a = cplex.constant(0.0);
-			for(int i=0; i<nodes; i++) {
-				expr21a = cplex.sum(qp[i][0][t-1],expr21a);	
-			}
-			expr21a = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21a);
-			cplex.addLe(cp[t],expr20a);
-
-			IloNumExpr expr21b = cplex.constant(0.0);
-			for(int i=1; i<nodes; i++) {
+				expr20b = cplex.sum(qg[i][0][t-1],expr20b);
+				expr21a = cplex.sum(qp[i][0][t-1],expr21a);
 				expr21b = cplex.sum(qg[i][0][t-1],expr21b);	
 			}
-			expr21b = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21b);
+			cplex.addLe(cp[t],expr20a);
+			cplex.addLe(cg[t],expr20b);
+			expr21a = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21a);
+			cplex.addLe(cp[t],expr21a);
+			expr21b = cplex.sum(cplex.prod(-capacityTruck, etag[t]),expr21b);
 			cplex.addLe(cg[t],expr21b);
 		}
 
@@ -486,16 +477,15 @@ public class CplexModel {
 			expr = cplex.sum(cplex.prod(m, s[t]), expr);
 			expr = cplex.sum(cplex.prod(recyclingPlastic, etap[t]), expr);
 			expr = cplex.sum(cplex.prod(recyclingGlass, etag[t]), expr);
-
 			for(int i=0; i < nodes; i++) {
 				for(int j=0; j < nodes; j++) {
 					if (i != j) {
 						expr = cplex.sum(cplex.prod(graph.getDistance(i, j), yp[i][j][t]), expr);
 						expr = cplex.sum(cplex.prod(graph.getDistance(i, j), yg[i][j][t]), expr);
-					}
-					if(i != 0) {
-						expr = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(),yp[i][j][t]),expr);
-						expr = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(),yg[i][j][t]),expr);
+						if(i != 0) {
+							expr = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(),yp[i][j][t]),expr);
+							expr = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(),yg[i][j][t]),expr);
+						}
 					}
 				}
 			}
