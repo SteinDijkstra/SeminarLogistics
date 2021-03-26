@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,10 +18,13 @@ public class Graph {
 	/**
 	 * Create an empty graph with specified distances; Locations should be added in later
 	 * @param incidenceMatrix int matrix with distances
+	 * @throws IOException 
+	 * @throws NumberFormatException 
 	 */
-	public Graph(int[][] incidenceMatrix) {
+	public Graph(int[][] incidenceMatrix) throws NumberFormatException, IOException {
 		locations = new ArrayList<>();
 		this.incidenceMatrix = incidenceMatrix;
+		locations = Utils.readLocations("Deposit_data.csv",this);
 		random = new Random(0);
 	}
 
