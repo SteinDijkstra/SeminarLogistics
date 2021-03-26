@@ -233,7 +233,7 @@ public class CplexModel {
 			cplex.addEq(exprp1, exprp2);
 			cplex.addEq(exprg1, exprg2);
 		}
-		
+
 		// Constraint 13
 		for (int t=1; t < timeHorizon; t++) {
 			IloNumExpr exprp = cplex.constant(0.0);
@@ -245,7 +245,7 @@ public class CplexModel {
 			cplex.addEq(exprp, cp[t]);
 			cplex.addEq(exprg, cg[t]);
 		}
-		
+
 		// Constraint 14
 		for (int t=1; t < timeHorizon; t++) {
 			for (int i=0; i < nodes; i++) {
@@ -259,7 +259,7 @@ public class CplexModel {
 				}
 			}
 		}
-		
+
 		// Constraint 15
 		for (int t=1; t < timeHorizon; t++) {
 			IloNumExpr sumyp = cplex.constant(0.0);
@@ -278,7 +278,230 @@ public class CplexModel {
 			cplex.addLe(qg[0][0][t], exprg);
 		}
 
-		// laat staan
+		// CONSTRAINT Overflow
+		//		for(int t=0; t<timeHorizon; t++) {
+		//			for(int i=1; i<nodes; i++) {
+		//				cplex.addLe(fp[i][t],graph.getLocation(i).getPlasticContainer().getCapacity());
+		//				cplex.addLe(fg[i][t],graph.getLocation(i).getGlassContainer().getCapacity());
+		//			}
+		//		}
+
+		for(int t=0; t<timeHorizon; t++) {
+			for(int i=1; i<nodes; i++) {
+				IloNumExpr expr17bi1 = cplex.constant(0.0);
+				expr17bi1 = cplex.sum(fp[i][t], -graph.getLocation(i).getPlasticContainer().getCapacity());
+				cplex.addLe(expr17bi1, cplex.prod(M, op[i][t]));
+
+				IloNumExpr expr17bi2 = cplex.constant(0.0);
+				expr17bi2 = cplex.sum(fg[i][t], -graph.getLocation(i).getGlassContainer().getCapacity());
+				cplex.addLe(expr17bi2, cplex.prod(M, og[i][t]));
+			}
+		}
+
+
+		for(int i=1; i<nodes; i++) {
+			IloNumExpr expr17bii = cplex.constant(0.0);
+			for(int t=0; t<260 && t< timeHorizon; t++) {
+				expr17bii=cplex.sum(op[i][t],expr17bii);
+				expr17bii=cplex.sum(og[i][t],expr17bii);
+			}
+			cplex.addLe(expr17bii, 5);
+		}
+
+		for(int i=1; i<nodes; i++) {
+			for(int v=0; v<timeHorizon-1; v++) {
+				IloNumExpr expr17biii1 = cplex.constant(0.0);
+				expr17biii1=cplex.sum(op[i][v],expr17biii1);
+				expr17biii1=cplex.sum(op[i][v+1],expr17biii1);
+				cplex.addLe(expr17biii1, 1);
+
+				IloNumExpr expr17biii2 = cplex.constant(0.0);
+				expr17biii2=cplex.sum(og[i][v],expr17biii2);
+				expr17biii2=cplex.sum(og[i][v+1],expr17biii2);
+				cplex.addLe(expr17biii2, 1);
+			}
+		}		
+
+		// CONSTRAINT Bounding C_t^h
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr19a = cplex.constant(0.0);
+			expr19a = cplex.prod(capacityTruck,cplex.sum(1,cplex.prod(-1, etap[t])));
+			cplex.addLe(cp[t],expr19a);
+
+			IloNumExpr expr19b = cplex.constant(0.0);
+			expr19b = cplex.prod(capacityTruck,cplex.sum(1,cplex.prod(-1, etap[t])));
+			cplex.addLe(cp[t],expr19b);
+		}
+
+		for(int t=1; t<timeHorizon; t++) {
+			IloNumExpr expr20a = cplex.constant(0.0);
+			for(int i=0; i<nodes; i++) {
+				expr20a = cplex.sum(qp[i][0][t-1],expr20a);	
+			}
+			cplex.addLe(cp[t],expr20a);
+
+			IloNumExpr expr20b = cplex.constant(0.0);
+			for(int i=1; i<nodes; i++) {
+				expr20b = cplex.sum(qg[i][0][t-1],expr20b);	
+			}
+			cplex.addLe(cg[t],expr20b);
+
+			IloNumExpr expr21a = cplex.constant(0.0);
+			for(int i=0; i<nodes; i++) {
+				expr21a = cplex.sum(qp[i][0][t-1],expr21a);	
+			}
+			expr21a = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21a);
+			cplex.addLe(cp[t],expr20a);
+
+			IloNumExpr expr21b = cplex.constant(0.0);
+			for(int i=1; i<nodes; i++) {
+				expr21b = cplex.sum(qg[i][0][t-1],expr21b);	
+			}
+			expr21b = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21b);
+			cplex.addLe(cg[t],expr21b);
+		}
+
+		// CONSTRAINT One Recycling facility
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr = cplex.constant(0.0);
+			expr = cplex.sum(etap[t],etag[t]);
+			cplex.addLe(expr, 1);
+		}
+
+
+		// CONSTRAINT Individual Swap 1
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr1p1 = cplex.constant(0.0);
+			expr1p1 = cplex.sum(zg[t],etap[t]);
+			expr1p1 = cplex.sum(-1,expr1p1);
+			cplex.addLe(expr1p1, p[0][t]);
+
+			IloNumExpr expr2p1 = cplex.constant(0.0);
+			expr2p1 = cplex.sum(zp[t],etag[t]);
+			expr2p1 = cplex.sum(-1,expr2p1);
+			cplex.addLe(expr2p1, p[0][t]);
+		}
+
+		// CONSTRAINT Individual Swap 2
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr1p2 = cplex.constant(0.0);
+			expr1p2 = cplex.sum(zg[t],expr1p2);
+			for(int j=1; j<nodes; j++) {
+				expr1p2 = cplex.sum(yp[0][j][t],expr1p2);	
+			}
+			expr1p2 = cplex.sum(cplex.prod(-1, p[0][t]),expr1p2);
+			expr1p2 = cplex.sum(-1,expr1p2);
+			cplex.addLe(expr1p2, p[1][t]);
+
+			IloNumExpr expr2p2 = cplex.constant(0.0);
+			expr2p2 = cplex.sum(zp[t],expr2p2);
+			for(int j=1; j<nodes; j++) {
+				expr2p2 = cplex.sum(yg[0][j][t],expr2p2);	
+			}
+			expr2p2 = cplex.sum(cplex.prod(-1, p[0][t]),expr2p2);
+			expr2p2 = cplex.sum(-1,expr2p2);
+			cplex.addLe(expr2p2, p[1][t]);
+
+			IloNumExpr expr3p2 = cplex.constant(0.0);
+			expr3p2 = cplex.sum(etap[t],expr3p2);
+			for(int j=1; j<nodes; j++) {
+				expr3p2 = cplex.sum(yg[0][j][t],expr3p2);	
+			}
+			expr3p2 = cplex.sum(-1,expr3p2);
+			cplex.addLe(expr3p2, p[1][t]);
+
+			IloNumExpr expr4p2 = cplex.constant(0.0);
+			expr4p2 = cplex.sum(etag[t],expr4p2);
+			for(int j=1; j<nodes; j++) {
+				expr4p2 = cplex.sum(yp[0][j][t],expr4p2);	
+			}
+			expr4p2 = cplex.sum(-1,expr4p2);
+			cplex.addLe(expr4p2, p[1][t]);
+		}
+
+		// CONSTRAINT Individual Swap 3
+		for(int t=0; t<timeHorizon-1; t++) {
+			IloNumExpr expr1p3 = cplex.constant(0.0);
+			expr1p3 = cplex.sum(zg[t],zp[t+1]);
+			expr1p3 = cplex.sum(cplex.prod(-1,p[0][t]),expr1p3);
+			expr1p3 = cplex.sum(cplex.prod(-1,p[1][t]),expr1p3);
+			expr1p3 = cplex.sum(-1,expr1p3);
+			cplex.addLe(expr1p3, p[2][t]);
+
+			IloNumExpr expr2p3 = cplex.constant(0.0);
+			expr2p3 = cplex.sum(zp[t],zg[t+1]);
+			expr2p3 = cplex.sum(cplex.prod(-1,p[0][t]),expr2p3);
+			expr2p3 = cplex.sum(cplex.prod(-1,p[1][t]),expr2p3);
+			expr2p3 = cplex.sum(-1,expr2p3);
+			cplex.addLe(expr1p3, p[2][t]);
+
+			IloNumExpr expr3p3 = cplex.constant(0.0);
+			expr3p3 = cplex.sum(etap[t],zg[t+1]);
+			expr3p3 = cplex.sum(cplex.prod(-1,p[1][t]),expr3p3);
+			expr3p3 = cplex.sum(-1,expr3p3);
+			cplex.addLe(expr3p3, p[2][t]);
+
+			IloNumExpr expr4p3 = cplex.constant(0.0);
+			expr4p3 = cplex.sum(etag[t],zp[t+1]);
+			expr4p3 = cplex.sum(cplex.prod(-1,p[1][t]),expr4p3);
+			expr4p3 = cplex.sum(-1,expr4p3);
+			cplex.addLe(expr4p3, p[2][t]);
+
+			IloNumExpr expr5p3 = cplex.constant(0.0);
+			for(int j=1; j<nodes; j++) {
+				expr5p3 = cplex.sum(yg[0][j][t],expr5p3);	
+			}
+			expr5p3 = cplex.sum(zp[t+1],expr5p3);
+			expr5p3 = cplex.sum(-1,expr5p3);
+			cplex.addLe(expr5p3, p[2][t]);
+
+			IloNumExpr expr6p3 = cplex.constant(0.0);
+			for(int j=1; j<nodes; j++) {
+				expr6p3 = cplex.sum(yp[0][j][t],expr6p3);	
+			}
+			expr6p3 = cplex.sum(zg[t+1],expr6p3);
+			expr6p3 = cplex.sum(-1,expr6p3);
+			cplex.addLe(expr6p3, p[2][t]);
+		}
+
+		// CONSTRAINT Total Swaps
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr = cplex.constant(0.0);
+			for(int k=0; k<3; k++) {
+				expr = cplex.sum(p[k][t],expr);
+			}
+			cplex.addEq(expr, s[t]);
+		}
+
+		// CONSTRAINT Truck at the end of the day
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr = cplex.constant(0.0);
+			expr = cplex.sum(zp[t], zg[t]);
+			cplex.addEq(expr, 1);
+		}
+
+		// CONSTRAINT Working days
+		for(int t=0; t<timeHorizon; t++) {
+			IloNumExpr expr = cplex.constant(0.0);
+			expr = cplex.sum(cplex.prod(m, s[t]), expr);
+			expr = cplex.sum(cplex.prod(recyclingPlastic, etap[t]), expr);
+			expr = cplex.sum(cplex.prod(recyclingGlass, etag[t]), expr);
+
+			for(int i=0; i < nodes; i++) {
+				for(int j=0; j < nodes; j++) {
+					if (i != j) {
+						expr = cplex.sum(cplex.prod(graph.getDistance(i, j), yp[i][j][t]), expr);
+						expr = cplex.sum(cplex.prod(graph.getDistance(i, j), yg[i][j][t]), expr);
+					}
+					if(i != 0) {
+						expr = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(),yp[i][j][t]),expr);
+						expr = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(),yg[i][j][t]),expr);
+					}
+				}
+			}
+			cplex.addLe(expr, 480);
+		}
+
 		// Solve the model
 		boolean solved = cplex.solve();
 
@@ -289,17 +512,7 @@ public class CplexModel {
 
 		System.out.println("Solved. Objective = " + cplex.getObjValue());
 
-		int sum=0;
-		for(int i=0; i<nodes; i++) {
-			for (int j=0; j < nodes; j++) {
-				if (y[i][j].toString() == "1") 
-					sum++;
-			}
-		}
-		System.out.println(sum);
 	}
-
-
 
 }
 
