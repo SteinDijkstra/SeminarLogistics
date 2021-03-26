@@ -44,16 +44,16 @@ public class Utils {
 	public static int[][] readDeposits(String deposits) throws NumberFormatException, IOException {
 		try(BufferedReader scan = new BufferedReader(new FileReader(new File(deposits) ))){
 			int nNodes = Integer.parseInt(scan.readLine());
-			int[][] result = new int[nNodes][200];
+			int[][] result = new int[200][nNodes];
 
 			String newLine;
-			int from = 0;
+			int t = 0;
 			while((newLine = scan.readLine())!=null) {
-				String[] asciiNumbers=newLine.split(";");
-				for(int to = 0; to < asciiNumbers.length; to++) {
-					result[from][to] = Integer.parseInt(asciiNumbers[to]); 
+				String[] asciiNumbers=newLine.split(",");
+				for(int location = 0; location < asciiNumbers.length; location++) {
+					result[t][location] = Integer.parseInt(asciiNumbers[location]); 
 				}
-				from++;
+				t++;
 			}
 			return result;
 		}

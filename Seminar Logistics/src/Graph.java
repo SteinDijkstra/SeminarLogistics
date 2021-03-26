@@ -24,7 +24,6 @@ public class Graph {
 	public Graph(int[][] incidenceMatrix) throws NumberFormatException, IOException {
 		locations = new ArrayList<>();
 		this.incidenceMatrix = incidenceMatrix;
-		locations = Utils.readLocations("Deposit_data.csv",this);
 		random = new Random(0);
 	}
 

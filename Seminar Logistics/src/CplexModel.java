@@ -14,8 +14,10 @@ public class CplexModel {
 
 
 	public static void main(String[] args) throws IloException, NumberFormatException, IOException {
+		
 		IloCplex cplex = new IloCplex();
-		final Graph graph = new Graph(Utils.readTravelTime("updated2_travel_time_matrix.csv"));
+		Graph graph = new Graph(null);
+		graph = Utils.init("updated2_travel_time_matrix.csv", "Deposit_data.csv");
 		int[][] rg = Utils.readDeposits("glass_deposits.csv");
 		int[][] rp = Utils.readDeposits("plastic_deposits.csv");
 		int nodes = graph.getLocations().size();
