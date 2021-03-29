@@ -6,11 +6,12 @@
  *
  */
 public class Container {
-	private final double capacity; //max capacity of this container
-	private final double meanGarbageDisposed; //mean garbage disposed
-	private final double stdGarbageDisposed; //standard deviation of garbage disposed
-	private double actualAmountGarbage; //amount of garbage present in container
-	private double predictedAmountGarbage; //amount of garbage for planning purposes
+	private final double capacity; // max capacity of this container
+	private final double meanGarbageDisposed; // mean garbage disposed
+	private final double stdGarbageDisposed; // standard deviation of garbage disposed
+	private double initialAmountGarbage; // initial amount of waste in container
+	private double actualAmountGarbage; // amount of waste present in container
+	private double predictedAmountGarbage; // amount of waste for planning purposes
 	
 	//-------------------Constructors-----------------
 	/**
@@ -44,6 +45,30 @@ public class Container {
 	
 	//--------------Setters and getters----------------
 	/**
+	 * Set the initial amount of garbage in the container to be uniformly distributed over the capacity
+	 */
+	public void setInitialAmountGarbage() {
+		double rand = Math.random();
+		this.initialAmountGarbage = this.capacity*rand;
+	}
+	
+	/**
+	 * Set the initial amount of garbage in the container to be uniformly distributed over the capacity, corrected for the mean
+	 */
+	public void setInitialAmountGarbageMean() {
+		double rand = Math.random();
+		this.initialAmountGarbage = this.capacity*rand - this.meanGarbageDisposed;
+	}
+	
+	/**
+	 * Returns the initial amount of garbage in the container
+	 * @return double value of cubic amount of garbage
+	 */
+	public double getInitialAmountGarbage() {
+		return initialAmountGarbage;
+	}
+	
+	/**
 	 * Returns the actual amount of garbage present in the container
 	 * DO NOT USE FOR PLANNING PURPOSES
 	 * @return double value of cubic amount of garbage
@@ -67,7 +92,7 @@ public class Container {
 	}
 	
 	/**
-	 * set the actual amount of garbage equal to a certain number that is non negative
+	 * Set the actual amount of garbage equal to a certain number that is non negative
 	 * @param amount double value that is in the garbage bin
 	 */
 	public void setActualAmountGarbage(double amount) {
@@ -119,6 +144,10 @@ public class Container {
 	 */
 	public double getCapacity() {
 		return capacity;
+	}
+	
+	public double getMeanGarbageDisposed() {
+		return this.meanGarbageDisposed;
 	}
 	
 	//--------------Utility methods--------------------
