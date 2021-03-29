@@ -9,7 +9,6 @@ public class Container {
 	private final double capacity; // max capacity of this container
 	private final double meanGarbageDisposed; // mean garbage disposed
 	private final double stdGarbageDisposed; // standard deviation of garbage disposed
-	private double initialAmountGarbage; // initial amount of waste in container
 	private double actualAmountGarbage; // amount of waste present in container
 	private double predictedAmountGarbage; // amount of waste for planning purposes
 	
@@ -43,31 +42,7 @@ public class Container {
 		stdGarbageDisposed = 0;
 	}
 	
-	//--------------Setters and getters----------------
-	/**
-	 * Set the initial amount of garbage in the container to be uniformly distributed over the capacity
-	 */
-	public void setInitialAmountGarbage() {
-		double rand = Math.random();
-		this.initialAmountGarbage = this.capacity*rand;
-	}
-	
-	/**
-	 * Set the initial amount of garbage in the container to be uniformly distributed over the capacity, corrected for the mean
-	 */
-	public void setInitialAmountGarbageMean() {
-		double rand = Math.random();
-		this.initialAmountGarbage = this.capacity*rand - this.meanGarbageDisposed;
-	}
-	
-	/**
-	 * Returns the initial amount of garbage in the container
-	 * @return double value of cubic amount of garbage
-	 */
-	public double getInitialAmountGarbage() {
-		return initialAmountGarbage;
-	}
-	
+	//--------------Setters and getters----------------	
 	/**
 	 * Returns the actual amount of garbage present in the container
 	 * DO NOT USE FOR PLANNING PURPOSES
