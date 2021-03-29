@@ -25,7 +25,7 @@ public class SolveDaily {
 	
 	public static void init(Graph model) {
 		SolveDaily.model=model;
-		ExactSmall.init(model);
+		//ExactSmall.init(model);
 	}
 	
 	public static int solve(double percentage) {
