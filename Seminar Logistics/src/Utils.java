@@ -40,6 +40,24 @@ public class Utils {
 			return result;
 		}
 	}
+	
+	public static int[][] readDeposits(String deposits) throws NumberFormatException, IOException {
+		try(BufferedReader scan = new BufferedReader(new FileReader(new File(deposits) ))){
+			int nNodes = Integer.parseInt(scan.readLine());
+			int[][] result = new int[200][nNodes];
+
+			String newLine;
+			int t = 0;
+			while((newLine = scan.readLine())!=null) {
+				String[] asciiNumbers=newLine.split(",");
+				for(int location = 0; location < asciiNumbers.length; location++) {
+					result[t][location] = Integer.parseInt(asciiNumbers[location]); 
+				}
+				t++;
+			}
+			return result;
+		}
+	}
 
 	/** This method reads all locations from the data files
 	 * @param depositData file that is read
