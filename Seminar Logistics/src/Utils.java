@@ -41,17 +41,16 @@ public class Utils {
 		}
 	}
 	
-	public static int[][] readDeposits(String deposits) throws NumberFormatException, IOException {
+	public static double[][] readDeposits(String deposits) throws NumberFormatException, IOException {
 		try(BufferedReader scan = new BufferedReader(new FileReader(new File(deposits) ))){
-			int nNodes = Integer.parseInt(scan.readLine());
-			int[][] result = new int[200][nNodes];
+			double[][] result = new double[200][208];
 
 			String newLine;
 			int t = 0;
 			while((newLine = scan.readLine())!=null) {
-				String[] asciiNumbers=newLine.split(",");
+				String[] asciiNumbers = newLine.split(";");
 				for(int location = 0; location < asciiNumbers.length; location++) {
-					result[t][location] = Integer.parseInt(asciiNumbers[location]); 
+					result[t][location] = Double.parseDouble(asciiNumbers[location]); 
 				}
 				t++;
 			}
