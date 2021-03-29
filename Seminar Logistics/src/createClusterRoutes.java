@@ -31,17 +31,17 @@ public class createClusterRoutes {
 		}
 	}
 	
-	public static List<List<Integer>> allCombination(List<Integer>cluster, int distance){
-		List<List<Integer>> result= new ArrayList<>();
-		if(distance>maxDistanceRoute) {
-			return result;
-		}
-		if(cluster.isEmpty()) {
-			result.add(new ArrayList<>());
-			return result;
-		}
-		
-	}
+//	public static List<List<Integer>> allCombination(List<Integer>cluster, int distance){
+//		List<List<Integer>> result= new ArrayList<>();
+//		if(distance>maxDistanceRoute) {
+//			return result;
+//		}
+//		if(cluster.isEmpty()) {
+//			result.add(new ArrayList<>());
+//			return result;
+//		}
+//		
+//	}
 	
 	
 	/*
