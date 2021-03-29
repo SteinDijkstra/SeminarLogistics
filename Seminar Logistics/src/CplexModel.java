@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -12,9 +13,13 @@ import ilog.cplex.IloCplex;
 public class CplexModel {
 
 
-	public static void main(String[] args) throws IloException {
-		IloCplex cplex = new IloCplex();;
-		final Graph graph = null;
+	public static void main(String[] args) throws IloException, NumberFormatException, IOException {
+		
+		IloCplex cplex = new IloCplex();
+		Graph graph = new Graph(null);
+		graph = Utils.init("updated2_travel_time_matrix.csv", "Deposit_data.csv");
+		int[][] rg = Utils.readDeposits("glass_deposits.csv");
+		int[][] rp = Utils.readDeposits("plastic_deposits.csv");
 		int nodes = graph.getLocations().size();
 		int timeHorizon = 1;
 		double capacityTruck = 75;
@@ -75,8 +80,6 @@ public class CplexModel {
 			}
 		}
 
-
-
 		// Objective
 		IloNumExpr obj = cplex.constant(0.0);
 		for (int t=0; t < timeHorizon; t++) {
@@ -101,15 +104,15 @@ public class CplexModel {
 		// Constraint 1 TODO: r bepalen
 		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
-				IloNumExpr exprp = cplex.sum(cplex.sum(fp[i][t-1], cplex.prod(-1, xp[i][t-1])),graph.getLocation(i).getActualPlastic());
-				IloNumExpr exprg = cplex.sum(cplex.sum(fg[i][t-1], cplex.prod(-1, xg[i][t-1])),graph.getLocation(i).getActualGlass());
+				IloNumExpr exprp = cplex.sum(cplex.sum(fp[i][t-1], cplex.prod(-1, xp[i][t-1])),rp[i][t]);
+				IloNumExpr exprg = cplex.sum(cplex.sum(fg[i][t-1], cplex.prod(-1, xg[i][t-1])),rg[i][t]);
 				cplex.addEq(fp[i][t], exprp);
 				cplex.addEq(fg[i][t], exprg);
 			}
 		}
 
 		// Constraint 2
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				cplex.addLe(xp[i][t], fp[i][t]);
 				cplex.addLe(xg[i][t], fg[i][t]);
@@ -117,7 +120,7 @@ public class CplexModel {
 		}
 
 		// Constraint 3
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr sumyp = cplex.constant(0.0);
 				IloNumExpr sumyg = cplex.constant(0.0);
@@ -135,7 +138,7 @@ public class CplexModel {
 		}
 
 		// Constraint 4
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr sumyp = cplex.constant(0.0);
 				IloNumExpr sumyg = cplex.constant(0.0);
@@ -153,7 +156,7 @@ public class CplexModel {
 		}
 
 		// Constraint 5
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr exprp1 = cplex.sum(capacityTruck, cplex.prod(-1, qp[i][0][t]));
 				IloNumExpr exprp2 = cplex.sum(M, cplex.prod(-M, gp[i][t]));
@@ -286,7 +289,7 @@ public class CplexModel {
 		//			}
 		//		}
 
-		for(int t=0; t<timeHorizon; t++) {
+		for(int t=1; t<timeHorizon; t++) {
 			for(int i=1; i<nodes; i++) {
 				IloNumExpr expr17bi1 = cplex.constant(0.0);
 				expr17bi1 = cplex.sum(fp[i][t], -graph.getLocation(i).getPlasticContainer().getCapacity());
@@ -301,7 +304,7 @@ public class CplexModel {
 
 		for(int i=1; i<nodes; i++) {
 			IloNumExpr expr17bii = cplex.constant(0.0);
-			for(int t=0; t<260 && t< timeHorizon; t++) {
+			for(int t=1; t<260 && t< timeHorizon; t++) {
 				expr17bii=cplex.sum(op[i][t],expr17bii);
 				expr17bii=cplex.sum(og[i][t],expr17bii);
 			}
