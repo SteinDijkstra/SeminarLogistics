@@ -40,13 +40,14 @@ public class Graph {
 		locations.addAll(newLocations);
 	}
 
+	/*
 	public void removeLocation(Location remLocation) {
 		if(!locations.contains(remLocation)) {
 			throw new IllegalArgumentException("Please input location that exists in this list");
 		}
 		locations.remove(remLocation);
 	}
-
+*/
 	/**
 	 * Set the seed of the random number generation (used in updating)
 	 * @param seed seed to use for random numbers

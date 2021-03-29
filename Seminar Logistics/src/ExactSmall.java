@@ -12,13 +12,18 @@ public class ExactSmall {
 		model.initGarbage();
 		model.updateGarbage();
 		List<Location> toVisit=model.getLocWithContainerOverBound(1, true);
-		System.out.println("find optimal route through: "+toVisit);
+		//System.out.println("find optimal route through: "+toVisit);
 		solve(toVisit,true);
-		System.out.println("Optimal route is: "+getOptimalRoute());
-		System.out.println("with time: "+getOptimalTime());
+		//System.out.println("Optimal route is: "+getOptimalRoute());
+		//System.out.println("with time: "+getOptimalTime());
+	}
+	public static void init(Graph graph) {
+		model=graph;
 	}
 	
 	public static void solve(List<Location> toVisit,boolean isPlastic) {
+		optimalTime=Integer.MAX_VALUE;
+		optimalRoute=new ArrayList<>();
 		List<Integer>currentRoute=new ArrayList<>();
 		currentRoute.add(0);
 		int emptyTime=0;
@@ -26,7 +31,7 @@ public class ExactSmall {
 			if(isPlastic) {
 				emptyTime+=loc.getPlasticEmptyTime();
 			} else {
-				emptyTime+=loc.getGlassEmpyTime();
+				emptyTime+=loc.getGlassEmptyTime();
 			}
 		}
 		findRoute(toVisit,currentRoute, emptyTime);
@@ -37,8 +42,8 @@ public class ExactSmall {
 			int dist=model.getDistance(currentRoute.get(currentRoute.size()-1), 0);
 			currentTime+=dist;
 			currentRoute.add(0);
-			System.out.println("New solution: "+currentRoute);
-			System.out.println("with time: "+currentTime);
+			//System.out.println("New solution: "+currentRoute);
+			//System.out.println("with time: "+currentTime);
 			if(currentTime<optimalTime) {
 				optimalTime=currentTime;
 				optimalRoute=new ArrayList<>(currentRoute);

@@ -42,7 +42,7 @@ public class Location {
 	 * Return time to empty glass
 	 * @return integer amount of time
 	 */
-	public int getGlassEmpyTime() {
+	public int getGlassEmptyTime() {
 		return glassEmptyTime;
 	}
 	
