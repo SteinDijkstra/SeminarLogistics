@@ -12,7 +12,6 @@ import java.util.List;
  *
  */
 public class Utils {
-
 	public static Graph init() throws NumberFormatException, IOException {
 		return init("updated2_travel_time_matrix.csv","Deposit_data.csv");
 	}
@@ -37,6 +36,24 @@ public class Utils {
 					result[from][to] = Integer.parseInt(asciiNumbers[to]); 
 				}
 				from++;
+			}
+			return result;
+		}
+	}
+	
+	public static int[][] readDeposits(String deposits) throws NumberFormatException, IOException {
+		try(BufferedReader scan = new BufferedReader(new FileReader(new File(deposits) ))){
+			int nNodes = Integer.parseInt(scan.readLine());
+			int[][] result = new int[200][nNodes];
+
+			String newLine;
+			int t = 0;
+			while((newLine = scan.readLine())!=null) {
+				String[] asciiNumbers=newLine.split(",");
+				for(int location = 0; location < asciiNumbers.length; location++) {
+					result[t][location] = Integer.parseInt(asciiNumbers[location]); 
+				}
+				t++;
 			}
 			return result;
 		}
@@ -74,7 +91,7 @@ public class Utils {
 			System.out.print(loc.getIndex() + ", ");
 		}
 	}
-	
+
 	public static void solveTriangleInequality(String travelTime,String outputFile) throws NumberFormatException, IOException {
 		int[][]distances=readTravelTime(travelTime);
 		int[][]newDistances=new int[distances.length][distances.length];
@@ -92,7 +109,7 @@ public class Utils {
 		}
 		writeFile(newDistances,outputFile);
 	}
-	
+
 	public static void writeFile(int[][] matrix,String filename) throws IOException {
 		try(BufferedWriter br=new BufferedWriter(new FileWriter(new File(filename)))){
 			br.write(""+matrix.length);
