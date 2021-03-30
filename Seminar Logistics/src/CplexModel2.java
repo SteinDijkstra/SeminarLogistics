@@ -333,13 +333,9 @@ public class CplexModel2 {
 		for (int t=1; t <= timeHorizon; t++) {
 			IloNumExpr sumyp = cplex.constant(0.0);
 			IloNumExpr sumyg = cplex.constant(0.0);
-			for (int i=0; i < nodes; i++) {
-				for (int j=0; j < nodes; j++) {
-					if (i != j) {
-						sumyp = cplex.sum(sumyp, yPlastic[i][j][t]);
-						sumyg = cplex.sum(sumyg, yGlass[i][j][t]);
-					}
-				}
+			for (int j=1; j < nodes; j++) {
+				sumyp = cplex.sum(sumyp, yPlastic[0][j][t]);
+				sumyg = cplex.sum(sumyg, yGlass[0][j][t]);
 			}
 			IloNumExpr exprp = cplex.sum(capacityTruck, cplex.prod(-capacityTruck, sumyp));
 			IloNumExpr exprg = cplex.sum(capacityTruck, cplex.prod(-capacityTruck, sumyg));
