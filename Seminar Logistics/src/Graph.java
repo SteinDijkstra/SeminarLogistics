@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,8 +18,10 @@ public class Graph {
 	/**
 	 * Create an empty graph with specified distances; Locations should be added in later
 	 * @param incidenceMatrix int matrix with distances
+	 * @throws IOException 
+	 * @throws NumberFormatException 
 	 */
-	public Graph(int[][] incidenceMatrix) {
+	public Graph(int[][] incidenceMatrix) throws NumberFormatException, IOException {
 		locations = new ArrayList<>();
 		this.incidenceMatrix = incidenceMatrix;
 		random = new Random(0);
@@ -41,13 +44,14 @@ public class Graph {
 		locations.addAll(newLocations);
 	}
 
+	/*
 	public void removeLocation(Location remLocation) {
 		if(!locations.contains(remLocation)) {
 			throw new IllegalArgumentException("Please input location that exists in this list");
 		}
 		locations.remove(remLocation);
 	}
-
+*/
 	/**
 	 * Set the seed of the random number generation (used in updating)
 	 * @param seed seed to use for random numbers

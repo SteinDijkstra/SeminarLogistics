@@ -1,8 +1,4 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.IOException;
 
 import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
@@ -11,12 +7,16 @@ import ilog.cplex.IloCplex;
 
 public class CplexModel {
 
-
-	public static void main(String[] args) throws IloException {
-		IloCplex cplex = new IloCplex();;
-		final Graph graph = null;
+	private static IloCplex cplex;
+	
+	public static void main(String[] args) throws IloException, NumberFormatException, IOException {
+		cplex = new IloCplex();
+		Graph graph = new Graph(null);
+		graph = Utils.init("updated2_travel_time_matrix.csv", "Deposit_data.csv");
+		double[][] rg = Utils.readDeposits("glass_deposits2.csv");
+		double[][] rp = Utils.readDeposits("plastic_deposits2.csv");
 		int nodes = graph.getLocations().size();
-		int timeHorizon = 1;
+		int timeHorizon = 2;
 		double capacityTruck = 75;
 		double m = 20;
 		double recyclingPlastic = 113;
@@ -47,8 +47,8 @@ public class CplexModel {
 
 		// Variable initialization
 		for(int t=0; t < timeHorizon; t++) {
-			etap[t] = cplex.boolVar();
-			etag[t] = cplex.boolVar();
+			etap[t] = cplex.boolVar("tap"+t);
+			etag[t] = cplex.boolVar("tag"+t);
 			zp[t] = cplex.boolVar();
 			zg[t] = cplex.boolVar();
 			s[t] = cplex.intVar(0, 3);
@@ -59,13 +59,13 @@ public class CplexModel {
 			}
 			for(int i=0; i < nodes; i++) {
 				xp[i][t] = cplex.numVar(0, capacityTruck);
-				xp[i][t] = cplex.numVar(0, capacityTruck);
+				xg[i][t] = cplex.numVar(0, capacityTruck);
 				op[i][t] = cplex.boolVar();
-				op[i][t] = cplex.boolVar();
+				og[i][t] = cplex.boolVar();
 				gp[i][t] = cplex.boolVar();
-				gp[i][t] = cplex.boolVar();
+				gg[i][t] = cplex.boolVar();
 				fp[i][t] = cplex.numVar(0, capacityTruck);
-				fp[i][t] = cplex.numVar(0, capacityTruck);
+				fg[i][t] = cplex.numVar(0, capacityTruck);
 				for(int j=0; j < nodes; j++) {
 					yp[i][j][t] = cplex.boolVar();
 					yg[i][j][t] = cplex.boolVar();
@@ -74,8 +74,32 @@ public class CplexModel {
 				}
 			}
 		}
-
-
+		//		etap[0].setUB(0.0);
+		//		etag[0].setUB(0.0);
+		//		zp[0].setUB(0.0);
+		//		zg[0].setUB(0.0);
+		//		s[0].setUB(0.0);
+		//		cp[0].setUB(0.0);
+		//		cg[0].setUB(0.0);
+		//		for (int k=0; k < 3; k++) {
+		//			p[k][0].setUB(0.0);
+		//		}
+		for(int i=0; i < nodes; i++) {
+			xp[i][0].setUB(0.0);
+			xg[i][0].setUB(0.0);
+		//			op[i][0].setUB(0.0);
+		//			og[i][0].setUB(0.0);
+		//			gp[i][0].setUB(0.0);
+		//			gg[i][0].setUB(0.0);
+		//			fp[i][0].setUB(0.0);
+		//			fg[i][0].setUB(0.0);
+		//			for(int j=0; j < nodes; j++) {
+		//				yp[i][j][0].setUB(0.0);
+		//				yg[i][j][0].setUB(0.0);
+		//				qp[i][j][0].setUB(0.0);
+		//				qg[i][j][0].setUB(0.0);
+		// }
+		}
 
 		// Objective
 		IloNumExpr obj = cplex.constant(0.0);
@@ -88,28 +112,29 @@ public class CplexModel {
 					if (i != j) {
 						obj = cplex.sum(cplex.prod(graph.getDistance(i, j), yp[i][j][t]), obj);
 						obj = cplex.sum(cplex.prod(graph.getDistance(i, j), yg[i][j][t]), obj);
-					}
-					if (i != 0 && j != 0) { // TODO: y fout
-						obj = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(), yp[0][j][t]), obj);
-						obj = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(), yg[0][j][t]), obj);
+						if (i != 0) {
+							obj = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(), yp[i][j][t]), obj);
+							obj = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(), yg[i][j][t]), obj);
+						}
 					}
 				}
 			}
 		}
 		cplex.addMinimize(obj);
 
-		// Constraint 1 TODO: r bepalen
+		// Constraint 1
 		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
-				IloNumExpr exprp = cplex.sum(cplex.sum(fp[i][t-1], cplex.prod(-1, xp[i][t-1])),graph.getLocation(i).getActualPlastic());
-				IloNumExpr exprg = cplex.sum(cplex.sum(fg[i][t-1], cplex.prod(-1, xg[i][t-1])),graph.getLocation(i).getActualGlass());
+				IloNumExpr exprp = cplex.sum(cplex.sum(fp[i][t-1], cplex.prod(-1, xp[i][t-1])), rp[t][i-1]);
+				// IloNumExpr exprp = cplex.sum(cplex.sum(fp[i][t-1], cplex.prod(-1, xp[i][t-1])),rp[t][i]);
+				IloNumExpr exprg = cplex.sum(cplex.sum(fg[i][t-1], cplex.prod(-1, xg[i][t-1])), rg[t][i-1]);
 				cplex.addEq(fp[i][t], exprp);
 				cplex.addEq(fg[i][t], exprg);
 			}
 		}
 
 		// Constraint 2
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				cplex.addLe(xp[i][t], fp[i][t]);
 				cplex.addLe(xg[i][t], fg[i][t]);
@@ -117,7 +142,7 @@ public class CplexModel {
 		}
 
 		// Constraint 3
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr sumyp = cplex.constant(0.0);
 				IloNumExpr sumyg = cplex.constant(0.0);
@@ -135,7 +160,7 @@ public class CplexModel {
 		}
 
 		// Constraint 4
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr sumyp = cplex.constant(0.0);
 				IloNumExpr sumyg = cplex.constant(0.0);
@@ -153,12 +178,12 @@ public class CplexModel {
 		}
 
 		// Constraint 5
-		for (int t=0; t < timeHorizon; t++) {
+		for (int t=1; t < timeHorizon; t++) {
 			for (int i=1; i < nodes; i++) {
 				IloNumExpr exprp1 = cplex.sum(capacityTruck, cplex.prod(-1, qp[i][0][t]));
-				IloNumExpr exprp2 = cplex.sum(M, cplex.prod(-1, gp[i][t]));
+				IloNumExpr exprp2 = cplex.sum(M, cplex.prod(-M, gp[i][t]));
 				IloNumExpr exprg1 = cplex.sum(capacityTruck, cplex.prod(-1, qg[i][0][t]));
-				IloNumExpr exprg2 = cplex.sum(M, cplex.prod(-1, gg[i][t]));
+				IloNumExpr exprg2 = cplex.sum(M, cplex.prod(-M, gg[i][t]));
 				cplex.addLe(exprp1, exprp2);
 				cplex.addLe(exprg1, exprg2);
 			}
@@ -279,48 +304,48 @@ public class CplexModel {
 		}
 
 		// CONSTRAINT Overflow
-		//		for(int t=0; t<timeHorizon; t++) {
-		//			for(int i=1; i<nodes; i++) {
-		//				cplex.addLe(fp[i][t],graph.getLocation(i).getPlasticContainer().getCapacity());
-		//				cplex.addLe(fg[i][t],graph.getLocation(i).getGlassContainer().getCapacity());
-		//			}
-		//		}
-
 		for(int t=0; t<timeHorizon; t++) {
 			for(int i=1; i<nodes; i++) {
-				IloNumExpr expr17bi1 = cplex.constant(0.0);
-				expr17bi1 = cplex.sum(fp[i][t], -graph.getLocation(i).getPlasticContainer().getCapacity());
-				cplex.addLe(expr17bi1, cplex.prod(M, op[i][t]));
-
-				IloNumExpr expr17bi2 = cplex.constant(0.0);
-				expr17bi2 = cplex.sum(fg[i][t], -graph.getLocation(i).getGlassContainer().getCapacity());
-				cplex.addLe(expr17bi2, cplex.prod(M, og[i][t]));
+				cplex.addLe(fp[i][t],graph.getLocation(i).getPlasticContainer().getCapacity());
+				cplex.addLe(fg[i][t],graph.getLocation(i).getGlassContainer().getCapacity());
 			}
 		}
 
-
-		for(int i=1; i<nodes; i++) {
-			IloNumExpr expr17bii = cplex.constant(0.0);
-			for(int t=0; t<260 && t< timeHorizon; t++) {
-				expr17bii=cplex.sum(op[i][t],expr17bii);
-				expr17bii=cplex.sum(og[i][t],expr17bii);
-			}
-			cplex.addLe(expr17bii, 5);
-		}
-
-		for(int i=1; i<nodes; i++) {
-			for(int v=0; v<timeHorizon-1; v++) {
-				IloNumExpr expr17biii1 = cplex.constant(0.0);
-				expr17biii1=cplex.sum(op[i][v],expr17biii1);
-				expr17biii1=cplex.sum(op[i][v+1],expr17biii1);
-				cplex.addLe(expr17biii1, 1);
-
-				IloNumExpr expr17biii2 = cplex.constant(0.0);
-				expr17biii2=cplex.sum(og[i][v],expr17biii2);
-				expr17biii2=cplex.sum(og[i][v+1],expr17biii2);
-				cplex.addLe(expr17biii2, 1);
-			}
-		}		
+//		for(int t=1; t<timeHorizon; t++) {
+//			for(int i=1; i<nodes; i++) {
+//				IloNumExpr expr17bi1 = cplex.constant(0.0);
+//				expr17bi1 = cplex.sum(fp[i][t], -graph.getLocation(i).getPlasticContainer().getCapacity());
+//				cplex.addLe(expr17bi1, cplex.prod(M, op[i][t]));
+//
+//				IloNumExpr expr17bi2 = cplex.constant(0.0);
+//				expr17bi2 = cplex.sum(fg[i][t], -graph.getLocation(i).getGlassContainer().getCapacity());
+//				cplex.addLe(expr17bi2, cplex.prod(M, og[i][t]));
+//			}
+//		}
+//
+//
+//		for(int i=1; i<nodes; i++) {
+//			IloNumExpr expr17bii = cplex.constant(0.0);
+//			for(int t=1; t<260 && t< timeHorizon; t++) {
+//				expr17bii=cplex.sum(op[i][t],expr17bii);
+//				expr17bii=cplex.sum(og[i][t],expr17bii);
+//			}
+//			cplex.addLe(expr17bii, 5);
+//		}
+//
+//		for(int i=1; i<nodes; i++) {
+//			for(int v=0; v<timeHorizon-1; v++) {
+//				IloNumExpr expr17biii1 = cplex.constant(0.0);
+//				expr17biii1=cplex.sum(op[i][v],expr17biii1);
+//				expr17biii1=cplex.sum(op[i][v+1],expr17biii1);
+//				cplex.addLe(expr17biii1, 1);
+//
+//				IloNumExpr expr17biii2 = cplex.constant(0.0);
+//				expr17biii2=cplex.sum(og[i][v],expr17biii2);
+//				expr17biii2=cplex.sum(og[i][v+1],expr17biii2);
+//				cplex.addLe(expr17biii2, 1);
+//			}
+//		}		
 
 		// CONSTRAINT Bounding C_t^h
 		for(int t=0; t<timeHorizon; t++) {
@@ -329,35 +354,26 @@ public class CplexModel {
 			cplex.addLe(cp[t],expr19a);
 
 			IloNumExpr expr19b = cplex.constant(0.0);
-			expr19b = cplex.prod(capacityTruck,cplex.sum(1,cplex.prod(-1, etap[t])));
-			cplex.addLe(cp[t],expr19b);
+			expr19b = cplex.prod(capacityTruck,cplex.sum(1,cplex.prod(-1, etag[t])));
+			cplex.addLe(cg[t],expr19b);
 		}
 
 		for(int t=1; t<timeHorizon; t++) {
 			IloNumExpr expr20a = cplex.constant(0.0);
+			IloNumExpr expr20b = cplex.constant(0.0);
+			IloNumExpr expr21a = cplex.constant(0.0);
+			IloNumExpr expr21b = cplex.constant(0.0);
 			for(int i=0; i<nodes; i++) {
 				expr20a = cplex.sum(qp[i][0][t-1],expr20a);	
-			}
-			cplex.addLe(cp[t],expr20a);
-
-			IloNumExpr expr20b = cplex.constant(0.0);
-			for(int i=1; i<nodes; i++) {
-				expr20b = cplex.sum(qg[i][0][t-1],expr20b);	
-			}
-			cplex.addLe(cg[t],expr20b);
-
-			IloNumExpr expr21a = cplex.constant(0.0);
-			for(int i=0; i<nodes; i++) {
-				expr21a = cplex.sum(qp[i][0][t-1],expr21a);	
-			}
-			expr21a = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21a);
-			cplex.addLe(cp[t],expr20a);
-
-			IloNumExpr expr21b = cplex.constant(0.0);
-			for(int i=1; i<nodes; i++) {
+				expr20b = cplex.sum(qg[i][0][t-1],expr20b);
+				expr21a = cplex.sum(qp[i][0][t-1],expr21a);
 				expr21b = cplex.sum(qg[i][0][t-1],expr21b);	
 			}
-			expr21b = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21b);
+			cplex.addLe(cp[t],expr20a);
+			cplex.addLe(cg[t],expr20b);
+			expr21a = cplex.sum(cplex.prod(-capacityTruck, etap[t]),expr21a);
+			cplex.addLe(cp[t],expr21a);
+			expr21b = cplex.sum(cplex.prod(-capacityTruck, etag[t]),expr21b);
 			cplex.addLe(cg[t],expr21b);
 		}
 
@@ -486,33 +502,37 @@ public class CplexModel {
 			expr = cplex.sum(cplex.prod(m, s[t]), expr);
 			expr = cplex.sum(cplex.prod(recyclingPlastic, etap[t]), expr);
 			expr = cplex.sum(cplex.prod(recyclingGlass, etag[t]), expr);
-
 			for(int i=0; i < nodes; i++) {
 				for(int j=0; j < nodes; j++) {
 					if (i != j) {
 						expr = cplex.sum(cplex.prod(graph.getDistance(i, j), yp[i][j][t]), expr);
 						expr = cplex.sum(cplex.prod(graph.getDistance(i, j), yg[i][j][t]), expr);
-					}
-					if(i != 0) {
-						expr = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(),yp[i][j][t]),expr);
-						expr = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(),yg[i][j][t]),expr);
+						if(i != 0) {
+							expr = cplex.sum(cplex.prod(graph.getLocation(i).getPlasticEmptyTime(),yp[i][j][t]),expr);
+							expr = cplex.sum(cplex.prod(graph.getLocation(i).getGlassEmptyTime(),yg[i][j][t]),expr);
+						}
 					}
 				}
 			}
 			cplex.addLe(expr, 480);
 		}
 
+
 		// Solve the model
-		boolean solved = cplex.solve();
+		
+		//boolean solved = cplex.solve();
+		cplex.exportModel("model.lp");
+		
+		//if(!solved) {
+		//	System.out.println("infeasible");
+		//	return;
+		//}
+		
+		//System.out.println("Solved. Objective = " + cplex.getObjValue());
 
-		if(!solved) {
-			System.out.println("infeasible");
-			return;
-		}
-
-		System.out.println("Solved. Objective = " + cplex.getObjValue());
-
+		// cplex.clearModel();
+		// cplex.end();
 	}
-
+		
 }
 
