@@ -17,6 +17,7 @@ public class ExactSmall {
 		model = Utils.init();
 		model.initGarbage();
 		model.updateGarbage();
+
 		// First check which containers should be visited today.
 		List<Location> toVisit = model.getLocWithContainerOverBound(1, true);
 		// TODO: check hoeveel containers dit zijn, voordat we verder gaan.
@@ -25,6 +26,7 @@ public class ExactSmall {
 		// The other printed line can be outcommented in the findRoute method.
 		System.out.println("Optimal route: " + getOptimalRoute() + " with time: " + getOptimalTime());
 	}
+
 
 	/** This method solves the model exactly, given the list of locations that must be visited
 	 * @param toVisit a list of locations of which we will form a route
@@ -81,6 +83,7 @@ public class ExactSmall {
 			if(currentTime < optimalTime) {
 				optimalTime = currentTime;
 				optimalRoute = new ArrayList<>(currentRoute);
+
 			}
 			// Subtract and remove the last part for backtracking purposes.
 			currentTime -= lastDistance;
