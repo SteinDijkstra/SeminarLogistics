@@ -33,7 +33,7 @@ public class ExactSmall {
 	 * @param isPlastic boolean plastic or not; necessary for picking right containers on location.
 	 */
 	public static void solve(List<Location> toVisit, boolean isPlastic) {
-		List<Integer>currentRoute = new ArrayList<>();
+		List<Integer> currentRoute = new ArrayList<>();
 		// We start at the depot
 		currentRoute.add(0);
 		int emptyTime = 0;
@@ -48,6 +48,8 @@ public class ExactSmall {
 				emptyTime += loc.getGlassEmptyTime();
 			}
 		}
+		optimalRoute = null;
+		optimalTime = Integer.MAX_VALUE;
 		findRoute(toVisit, currentRoute, emptyTime);
 		/* Check if we should reverse the route by seeing whether the first or last container that we're visiting
 		 * is more likely to overflow in the near future. We want the emptiest of the two at the end, because it
@@ -63,6 +65,7 @@ public class ExactSmall {
 				Collections.reverse(optimalRoute);
 			}
 		}
+		System.out.println("New solution: " + optimalRoute + " with time: " + optimalTime);
 	}
 
 	/** This method enumerates all routes recursively, keeping track of the best route and time,
@@ -79,7 +82,7 @@ public class ExactSmall {
 			int lastDistance = model.getDistance(currentRoute.get(currentRoute.size() - 1), 0);
 			currentTime += lastDistance;
 			currentRoute.add(0);
-			System.out.println("New solution: " + currentRoute + " with time: " + currentTime);
+			// System.out.println("New solution: " + currentRoute + " with time: " + currentTime);
 			if(currentTime < optimalTime) {
 				optimalTime = currentTime;
 				optimalRoute = new ArrayList<>(currentRoute);
@@ -91,7 +94,7 @@ public class ExactSmall {
 		} else {
 			// Add all locations one by one and call method recursively to obtain full route
 			for(int i = 0; i < toVisit.size(); i++) {
-				Location newLoc = toVisit.remove(i);;
+				Location newLoc = toVisit.remove(i);
 				int dist = model.getDistance(currentRoute.get(currentRoute.size() - 1), newLoc.getIndex());
 				currentTime += dist;
 				currentRoute.add(newLoc.getIndex());
@@ -118,5 +121,21 @@ public class ExactSmall {
 	 */
 	public static int getOptimalTime() {
 		return optimalTime;
+	}
+	
+	/**
+	 * This method sets the model for the exact small instance.
+	 * @param model the graph
+	 */
+	public static void setModel(Graph model) {
+		ExactSmall.model = model;
+	}
+	
+	/**
+	 * This method returns the graph of the model.
+	 * @return the model graph
+	 */
+	public static Graph getModel() {
+		return ExactSmall.model;
 	}
 }
