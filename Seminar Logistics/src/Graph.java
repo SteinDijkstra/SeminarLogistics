@@ -44,13 +44,14 @@ public class Graph {
 		locations.addAll(newLocations);
 	}
 
+	/*
 	public void removeLocation(Location remLocation) {
 		if(!locations.contains(remLocation)) {
 			throw new IllegalArgumentException("Please input location that exists in this list");
 		}
 		locations.remove(remLocation);
 	}
-
+*/
 	/**
 	 * Set the seed of the random number generation (used in updating)
 	 * @param seed seed to use for random numbers
@@ -179,6 +180,25 @@ public class Graph {
 		}
 	}
 
+	/**
+	 * Initializes the garbage bins, correcting for the mean value of garbage disposed
+	 */
+	public void initGarbageMean() {
+		for(Location loc:locations) {
+			//Set plastic value
+			Container plastic = loc.getPlasticContainer();
+			double amountPlastic = (plastic.getCapacity()-plastic.getMeanGarbageDisposed()) * random.nextDouble();
+			plastic.setActualAmountGarbage(amountPlastic);
+			plastic.setPredictedAmountGarbage(amountPlastic);//TODO exact amount not known.
+
+			//Set glass values
+			Container glass = loc.getGlassContainer();
+			double  amountGlass = (glass.getCapacity()-glass.getMeanGarbageDisposed()) * random.nextDouble();
+			glass.setActualAmountGarbage(amountGlass);
+			glass.setPredictedAmountGarbage(amountGlass);
+		}
+	}
+	
 	/**
 	 * update the garbage at the end of the day 
 	 */

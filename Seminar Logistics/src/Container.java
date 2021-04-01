@@ -42,7 +42,7 @@ public class Container {
 		stdGarbageDisposed = 0;
 	}
 	
-	//--------------Setters and getters----------------	
+	//--------------Setters and getters----------------
 	/**
 	 * Returns the actual amount of garbage present in the container
 	 * DO NOT USE FOR PLANNING PURPOSES

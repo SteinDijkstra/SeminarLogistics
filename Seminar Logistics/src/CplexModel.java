@@ -16,7 +16,7 @@ public class CplexModel {
 		double[][] rg = Utils.readDeposits("glass_deposits2.csv");
 		double[][] rp = Utils.readDeposits("plastic_deposits2.csv");
 		int nodes = graph.getLocations().size();
-		int timeHorizon = 12;
+		int timeHorizon = 2;
 		double capacityTruck = 75;
 		double m = 20;
 		double recyclingPlastic = 113;
@@ -47,8 +47,8 @@ public class CplexModel {
 
 		// Variable initialization
 		for(int t=0; t < timeHorizon; t++) {
-			etap[t] = cplex.boolVar();
-			etag[t] = cplex.boolVar();
+			etap[t] = cplex.boolVar("tap"+t);
+			etag[t] = cplex.boolVar("tag"+t);
 			zp[t] = cplex.boolVar();
 			zg[t] = cplex.boolVar();
 			s[t] = cplex.intVar(0, 3);
@@ -520,15 +520,15 @@ public class CplexModel {
 
 		// Solve the model
 		
-		boolean solved = cplex.solve();
-		// cplex.exportModel("model.lp");
+		//boolean solved = cplex.solve();
+		cplex.exportModel("model.lp");
 		
-		if(!solved) {
-			System.out.println("infeasible");
-			return;
-		}
+		//if(!solved) {
+		//	System.out.println("infeasible");
+		//	return;
+		//}
 		
-		System.out.println("Solved. Objective = " + cplex.getObjValue());
+		//System.out.println("Solved. Objective = " + cplex.getObjValue());
 
 		// cplex.clearModel();
 		// cplex.end();
