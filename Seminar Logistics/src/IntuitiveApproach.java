@@ -1,29 +1,41 @@
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Marian, Manuela
  *
  */
 public class IntuitiveApproach {
+	private final static double ALPHA = 0.95;
+	private final static double BETA = 0.95;
+	private final static int DELTA = 9;
+	private final static int ETA = 11;
+	private final static int THETA = 15;
 	private static Graph graph;
 	private static int nodes;
 	private static int timeHorizon;
-	private static ArrayList<ArrayList<Location>> plasticCubesToVisit;
-	private static ArrayList<ArrayList<Location>> glassCubesToVisit;
+	private static int gamma;
+	private static List<ArrayList<Location>> plasticCubesToVisit;
+	private static List<ArrayList<Location>> glassCubesToVisit;
 	private static int[] totalTime;
 	private static double[] plasticCollected;
 	private static double[] glassCollected;
 	private static boolean[] toPlasticRecycling;
 	private static boolean[] toGlassRecycling;
 	private static boolean[] isPlastic;
+	private static int[] overflow;
 
 	public static void main(String[] args) throws NumberFormatException, IOException {
 		graph = Utils.init("updated2_travel_time_matrix.csv", "Deposit_data.csv");
 		ExactSmall.setModel(graph);
 		nodes = graph.getLocations().size();
-		timeHorizon = 200;
+		timeHorizon = 100;
+		gamma = 0;
 		plasticCubesToVisit = new ArrayList<ArrayList<Location>>();
 		glassCubesToVisit = new ArrayList<ArrayList<Location>>();
 		totalTime = new int[timeHorizon];
@@ -33,16 +45,19 @@ public class IntuitiveApproach {
 		toGlassRecycling = new boolean[timeHorizon];
 		isPlastic = new boolean[timeHorizon];
 		isPlastic[0] = true;
-		solve();
+		overflow = new int[nodes];
+		for (int i=0; i < nodes; i++) {
+			overflow[i] = 0;
+		}
+		solveIntuitiveApproach();
 		output();
 	}
 
 	/**
 	 * @param args
 	 */
-	public static void solve() {
+	public static void solveIntuitiveApproach() {
 		graph.initGarbageMean();
-		
 		for(int t=0; t<timeHorizon; t++) {
 			totalTime[t] = 0;
 			plasticCollected[t] = 0;
@@ -53,7 +68,16 @@ public class IntuitiveApproach {
 			boolean emptyGlass = false;
 			if (t > 0) 
 				isPlastic[t] = isPlastic[t-1];
+			graph.updateGarbage();
+			updateOverflow();
+			if (t % 5 == 0) { // include weekend days
+				graph.updateGarbage();
+				updateOverflow();
+				graph.updateGarbage();
+				updateOverflow();
+			}
 			nextDay(); // get list of locations to empty next day
+			updateNextDay(t);
 			if(!plasticCubesToVisit.get(t).isEmpty()) {
 				ExactSmall.solve(plasticCubesToVisit.get(t), true); // get route of plastic locations to empty
 				totalTime[t] = totalTime[t] + ExactSmall.getOptimalTime(); // update total time spent
@@ -176,29 +200,99 @@ public class IntuitiveApproach {
 		}
 	}
 
-	public static void addPredictedWaste() {
-		for(int i=1; i<nodes; i++) {
-			graph.getLocation(i).getGlassContainer().changePredictedAmountGarbage(graph.getLocation(i).getGlassContainer().getMeanGarbageDisposed());
-			graph.getLocation(i).getPlasticContainer().changePredictedAmountGarbage(graph.getLocation(i).getPlasticContainer().getMeanGarbageDisposed());
-		}
-	}
-
 	public static void nextDay() {
 		ArrayList<Location> plasticCubesToday = new ArrayList<Location>();
 		ArrayList<Location> glassCubesToday = new ArrayList<Location>();
-		addPredictedWaste();
 		for(int i=1; i<nodes; i++) {
 			Container plasticContainer = graph.getLocation(i).getPlasticContainer();
-			if(plasticContainer.getPredictedAmountGarbage()>plasticContainer.getCapacity()) { // TODO: betekent dat we predicted gebruiken dat dit stochastisch model is?
+			if(plasticContainer.getPredictedAmountGarbage()>ALPHA*plasticContainer.getCapacity()) {
 				plasticCubesToday.add(graph.getLocation(i));
 			}
 			Container glassContainer = graph.getLocation(i).getGlassContainer();
-			if(glassContainer.getPredictedAmountGarbage()>glassContainer.getCapacity()) {
+			if(glassContainer.getPredictedAmountGarbage()>BETA*glassContainer.getCapacity()) {
 				glassCubesToday.add(graph.getLocation(i));
 			}
+
 		}
 		plasticCubesToVisit.add(plasticCubesToday);
 		glassCubesToVisit.add(glassCubesToday);
+	}
+
+	public static void updateOverflow() {
+		for (int i=1; i < nodes; i++) {
+			overflow[i] += graph.getLocation(i).isOverflow();
+		}
+	}
+
+	public static void updateNextDay(int t) {
+		List<Location> plasticCubesToday = plasticCubesToVisit.get(t);
+		Comparator<Location> bestPlasticLocationComparator = new Comparator<Location>() {
+			@Override
+			public int compare(Location o1, Location o2) { // keuze
+				double space1 = o1.getPlasticContainer().getSpaceLeft(); 
+				double space2 = o2.getPlasticContainer().getSpaceLeft(); 
+				return Double.compare(space1, space2);
+			}
+		};
+		List<Location> glassCubesToday = glassCubesToVisit.get(t);
+		Comparator<Location> bestGlassLocationComparator = new Comparator<Location>() {
+			@Override
+			public int compare(Location o1, Location o2) {
+				double space1 = o1.getGlassContainer().getSpaceLeft();
+				double space2 = o2.getGlassContainer().getSpaceLeft(); 
+				return Double.compare(space1, space2);
+			}
+		};
+		ArrayList<Location> tempPlastic = new ArrayList<Location>();
+		ArrayList<Location> tempGlass = new ArrayList<Location>();
+		if (plasticCubesToday.size() > DELTA && glassCubesToday.size() > ETA) {
+			Collections.sort(plasticCubesToday, bestPlasticLocationComparator); 
+			Collections.sort(glassCubesToday, bestGlassLocationComparator);
+			int i = 0;
+			int j = 0;
+			while (i+j < THETA) {
+				double space1 = plasticCubesToday.get(i).getPlasticContainer().getSpaceLeft();
+				double space2 = glassCubesToday.get(j).getGlassContainer().getSpaceLeft();
+				if (space1 < space2) {
+					tempPlastic.add(plasticCubesToday.get(i));
+					i++;
+				}
+				else if(space1 > space2) {
+					tempGlass.add(glassCubesToday.get(j));
+					j++;
+				}
+				else {
+					if(tempPlastic.size() < tempGlass.size()) {
+						tempPlastic.add(plasticCubesToday.get(i));
+						i++;
+					}
+					else {
+						tempGlass.add(glassCubesToday.get(j));
+						j++;
+					}
+				}
+			}
+			plasticCubesToVisit.set(t, tempPlastic);
+			glassCubesToVisit.set(t, tempGlass);
+		}
+		else if (plasticCubesToday.size() > DELTA) {
+			Collections.sort(plasticCubesToday, bestPlasticLocationComparator); 
+			// pas op :)
+			ArrayList<Location> temp = new ArrayList<Location>();
+			for (int i=0; i < DELTA; i++) {
+				temp.add(plasticCubesToday.get(i));
+			}
+			plasticCubesToVisit.set(t, temp);
+		}
+		else if (glassCubesToday.size() > ETA) {
+			Collections.sort(glassCubesToday, bestGlassLocationComparator);
+			// pas op :)
+			ArrayList<Location> temp = new ArrayList<Location>();
+			for (int i=0; i < gamma; i++) {
+				temp.add(glassCubesToday.get(i));
+			}
+			glassCubesToVisit.set(t, temp);
+		}
 	}
 
 	public static void output() {
@@ -207,16 +301,23 @@ public class IntuitiveApproach {
 		int overTime = 0;
 		int timesToPlasticRecycling = 0;
 		int timesToGlassRecycling = 0;
+		int totalOverflow = 0;
 		for (int i = 0; i < totalTime.length; i++) {
 			sum += totalTime[i];
 			if (totalTime[i] > 480) {
 				overTime++;
+				System.out.println("Working day time violated at time " + i + ", time is " + totalTime[i]);
 			}
 			if (toPlasticRecycling[i] == true)
 				timesToPlasticRecycling++;
 			if (toGlassRecycling[i] == true)
 				timesToGlassRecycling++;
 		}
+		for (int i=0; i < nodes; i++) {
+			totalOverflow += overflow[i];
+		}
+		System.out.println("Total times overflow = " + totalOverflow);
+		System.out.println("Number of overflow per location = " + Arrays.toString(overflow));
 		System.out.println("Objective value = " + sum);
 		System.out.println("Number of days working day time constraint is violated = " + overTime);
 		System.out.println("Number of times to plastic recycling = " + timesToPlasticRecycling + ", to glass recycling = " + timesToGlassRecycling);

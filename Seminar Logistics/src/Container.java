@@ -11,7 +11,7 @@ public class Container {
 	private final double stdGarbageDisposed; // standard deviation of garbage disposed
 	private double actualAmountGarbage; // amount of waste present in container
 	private double predictedAmountGarbage; // amount of waste for planning purposes
-	
+
 	//-------------------Constructors-----------------
 	/**
 	 * Constructor for a container with stochastic demand
@@ -27,7 +27,7 @@ public class Container {
 		meanGarbageDisposed = mean;
 		stdGarbageDisposed = std;
 	}
-	
+
 	/**
 	 * Constructor for a container with deterministic demand
 	 * @param capacity nonnegative value that represents the maximum capacity of a container
@@ -41,7 +41,7 @@ public class Container {
 		meanGarbageDisposed = mean;
 		stdGarbageDisposed = 0;
 	}
-	
+
 	//--------------Setters and getters----------------
 	/**
 	 * Returns the actual amount of garbage present in the container
@@ -51,7 +51,7 @@ public class Container {
 	public double getActualAmountGarbage() {
 		return actualAmountGarbage;
 	}
-	
+
 	/**
 	 * Changes the actual amount of garbage by the specified amount
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
@@ -65,7 +65,7 @@ public class Container {
 			actualAmountGarbage += change;
 		}
 	}
-	
+
 	/**
 	 * Set the actual amount of garbage equal to a certain number that is non negative
 	 * @param amount double value that is in the garbage bin
@@ -86,7 +86,7 @@ public class Container {
 	public double getPredictedAmountGarbage() {
 		return predictedAmountGarbage;
 	}
-	
+
 	/**
 	 * Changes the predicted amount of garbage by the specified amount
 	 * Change is added to the current amount. i.e. if the change is negative it is subtracted
@@ -100,7 +100,7 @@ public class Container {
 			predictedAmountGarbage += change;
 		}
 	}
-	
+
 	/**
 	 * set the predicted amount of garbage equal to a certain number that is non negative
 	 * @param amount double value that is in the garbage bin
@@ -112,7 +112,7 @@ public class Container {
 			predictedAmountGarbage = amount;
 		}
 	}
-	
+
 	/**
 	 * Return capacity of container
 	 * @return double in cubes
@@ -120,11 +120,11 @@ public class Container {
 	public double getCapacity() {
 		return capacity;
 	}
-	
+
 	public double getMeanGarbageDisposed() {
 		return this.meanGarbageDisposed;
 	}
-	
+
 	//--------------Utility methods--------------------
 	/**
 	 * Update predicted and actual amount of garbage. the randomNumber should be a based on a
@@ -136,12 +136,19 @@ public class Container {
 		double change = meanGarbageDisposed + randomNumber * stdGarbageDisposed;
 		changeActualAmountGarbage(change > 0 ? change : 0);
 	}
-	
-	
-	//--------------Other methods----------------------
-	@Override
-	public String toString() {
-		return "Actual amount: " + this.actualAmountGarbage + " Predicted amount: " + 
-				this.predictedAmountGarbage + " Max amount: " + this.capacity;
+
+	public boolean isOverflow() {
+		return this.getActualAmountGarbage() > this.getCapacity();
 	}
+	
+	public double getSpaceLeft() {
+		return this.getCapacity() - this.getPredictedAmountGarbage(); 
+	}
+
+//--------------Other methods----------------------
+@Override
+public String toString() {
+	return "Actual amount: " + this.actualAmountGarbage + " Predicted amount: " + 
+			this.predictedAmountGarbage + " Max amount: " + this.capacity;
+}
 }

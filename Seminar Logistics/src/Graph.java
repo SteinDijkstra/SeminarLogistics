@@ -51,7 +51,7 @@ public class Graph {
 		}
 		locations.remove(remLocation);
 	}
-*/
+	 */
 	/**
 	 * Set the seed of the random number generation (used in updating)
 	 * @param seed seed to use for random numbers
@@ -60,21 +60,16 @@ public class Graph {
 		random = new Random(seed);
 	}
 
+	public Random getRandom() {
+		return this.random;
+	}
+
 	/**
 	 * get all locations in the graph, including depot
 	 * @return list of all locations in graph
 	 */
 	public List<Location> getLocations(){
 		return locations;
-	}
-
-	/** get all locations in the graph, excluding depot
-	 * @return list of all locations, but not depot
-	 */
-	public List<Location> getLocationsExceptDepot() {
-		List<Location> temp = getLocations();
-		temp.remove(0);
-		return temp;
 	}
 
 	/**
@@ -179,18 +174,18 @@ public class Graph {
 			glass.setPredictedAmountGarbage(amountGlass);
 		}
 	}
-	
+
 	/**
 	 * update the garbage at the end of the day 
 	 */
 	public void updateGarbage() {
 		for(Location loc:locations) {
-			//update plastic value
+			// update plastic value
 			Container plastic = loc.getPlasticContainer();
 			double randomNormal = random.nextGaussian();
 			plastic.update(randomNormal);
 
-			//Set glass values
+			// update glass value
 			Container glass = loc.getGlassContainer();
 			randomNormal = random.nextGaussian();
 			glass.update(randomNormal);
