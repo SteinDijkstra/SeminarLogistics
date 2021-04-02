@@ -4,6 +4,7 @@ import ilog.concert.IloException;
 import ilog.concert.IloNumExpr;
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
+import ilog.cplex.IloCplex.UnknownObjectException;
 
 public class CplexModel2 {
 	private IloNumVar[] etaPlastic;
@@ -42,9 +43,35 @@ public class CplexModel2 {
 
 	
 	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
-		CplexModel2 model= new CplexModel2(Utils.init(),3);
+		CplexModel2 model= new CplexModel2(Utils.init(),1);
 		model.solve();
-		System.out.println(model.getObjective());
+		model.debug();
+		//System.out.println(model.cplex.getValue(model.qPlastic[0][0][1]));
+		//System.out.println(model.getObjective());
+	}
+	
+	public void debug() throws UnknownObjectException, IloException {
+		//System.out.println("cp0 "+cplex.getValue(cPlastic[0]));
+		System.out.println("cp1 "+cplex.getValue(cPlastic[1]));
+		System.out.println("cg0 "+cplex.getValue(cGlass[0]));
+		//System.out.println("cg1 "+cplex.getValue(cGlass[1]));
+//		System.out.println("etap1 "+cplex.getValue(etaPlastic[1]));
+//		//System.out.println("etap0 "+cplex.getValue(etaPlastic[0]));
+//		System.out.println("cg0 "+cplex.getValue(cGlass[0]));
+//		System.out.println("cg1 "+cplex.getValue(cGlass[1]));
+		System.out.println("qp000 "+cplex.getValue(qPlastic[0][0][0]));
+		//System.out.println("qp001 "+cplex.getValue(qPlastic[0][0][1]));
+
+//		System.out.println("yp031 "+cplex.getValue(yPlastic[0][3][1]));
+//		System.out.println("yg031 "+cplex.getValue(yGlass[0][3][1]));
+//		double sum=0;
+//		for(int i=0;i<nodes;i++) {
+//			System.out.println("qg0"+i+"0 "+cplex.getValue(qGlass[0][i][0]));
+//			sum+=cplex.getValue(qGlass[0][i][0]);
+//		}
+		//System.out.println(sum);
+		//System.out.println("zp0 "+cplex.getValue(zPlastic[0]));
+		//System.out.println("zp1 "+cplex.getValue(zPlastic[1]));
 	}
 	
 	public CplexModel2(Graph instance,int timeHorizon) throws IloException, NumberFormatException, IOException {
@@ -141,11 +168,13 @@ public class CplexModel2 {
 
 	public void setInitialConditions() throws IloException {
 		//Set initial c
-		cplex.addEq(cPlastic[0], 0.0);
-		cplex.addEq(cGlass[0], 0.0);
+		double initPlastic=10;
+		double initGlass=10;
+		//cplex.addEq(cPlastic[0], initPlastic);
+		//cplex.addEq(cGlass[0], initGlass);
 		//Set Initial value z
 		cplex.addEq(zPlastic[0],0.0);
-		cplex.addEq(zGlass[0], 0.0);
+		cplex.addEq(zGlass[0], 1.0);
 		//Set Init value for f
 		for(int i=1;i<nodes;i++) {
 			cplex.addEq(fPlastic[i][0],rPlastic[0][i-1]);
@@ -155,8 +184,13 @@ public class CplexModel2 {
 			cplex.addEq(xPlastic[i][0],0);
 			cplex.addEq(xGlass[i][0],0);
 			for(int j=0; j < nodes; j++) {
-				cplex.addEq(qPlastic[i][j][0],0);
-				cplex.addEq(qGlass[i][j][0],0);
+				if(i==0&&j==0) {
+					cplex.addEq(qPlastic[i][j][0],initPlastic);
+					cplex.addEq(qGlass[i][j][0],initGlass);
+				} else {
+					cplex.addEq(qPlastic[i][j][0],0);
+					cplex.addEq(qGlass[i][j][0],0);
+				}
 			}
 		}
 	}
@@ -304,7 +338,7 @@ public class CplexModel2 {
 		}
 
 		// Constraint 13
-		for (int t=1; t <= timeHorizon; t++) {
+		for (int t=0; t <= timeHorizon; t++) {
 			IloNumExpr exprp = cplex.constant(0.0);
 			IloNumExpr exprg = cplex.constant(0.0);
 			for (int i=0; i < nodes; i++) {
@@ -333,13 +367,9 @@ public class CplexModel2 {
 		for (int t=1; t <= timeHorizon; t++) {
 			IloNumExpr sumyp = cplex.constant(0.0);
 			IloNumExpr sumyg = cplex.constant(0.0);
-			for (int i=0; i < nodes; i++) {
-				for (int j=0; j < nodes; j++) {
-					if (i != j) {
-						sumyp = cplex.sum(sumyp, yPlastic[i][j][t]);
-						sumyg = cplex.sum(sumyg, yGlass[i][j][t]);
-					}
-				}
+			for (int j=1; j < nodes; j++) {
+				sumyp = cplex.sum(sumyp, yPlastic[0][j][t]);
+				sumyg = cplex.sum(sumyg, yGlass[0][j][t]);
 			}
 			IloNumExpr exprp = cplex.sum(capacityTruck, cplex.prod(-capacityTruck, sumyp));
 			IloNumExpr exprg = cplex.sum(capacityTruck, cplex.prod(-capacityTruck, sumyg));
@@ -384,9 +414,12 @@ public class CplexModel2 {
 			cplex.addLe(cPlastic[t],expr20a);
 			cplex.addLe(cGlass[t],expr20b);
 			expr21a = cplex.sum(cplex.prod(-capacityTruck, etaPlastic[t]),expr21a);
-			cplex.addLe(cPlastic[t],expr21a);
+			//expr21a = cplex.sum(-0.1,expr21a);//@todo
+			cplex.addGe(cPlastic[t],expr21a);
 			expr21b = cplex.sum(cplex.prod(-capacityTruck, etaGlass[t]),expr21b);
-			cplex.addLe(cGlass[t],expr21b);
+			//expr21b = cplex.sum(-0.1,expr21a);//@todo
+			cplex.addGe(cGlass[t],expr21b);
+			
 		}
 		
 		// CONSTRAINT One Recycling facility

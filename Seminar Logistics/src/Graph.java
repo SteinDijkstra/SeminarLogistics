@@ -162,6 +162,25 @@ public class Graph {
 	}
 
 	/**
+	 * Initializes the garbage bins, correcting for the mean value of garbage disposed
+	 */
+	public void initGarbageMean() {
+		for(Location loc:locations) {
+			//Set plastic value
+			Container plastic = loc.getPlasticContainer();
+			double amountPlastic = (plastic.getCapacity()-plastic.getMeanGarbageDisposed()) * random.nextDouble();
+			plastic.setActualAmountGarbage(amountPlastic);
+			plastic.setPredictedAmountGarbage(amountPlastic);//TODO exact amount not known.
+
+			//Set glass values
+			Container glass = loc.getGlassContainer();
+			double  amountGlass = (glass.getCapacity()-glass.getMeanGarbageDisposed()) * random.nextDouble();
+			glass.setActualAmountGarbage(amountGlass);
+			glass.setPredictedAmountGarbage(amountGlass);
+		}
+	}
+	
+	/**
 	 * update the garbage at the end of the day 
 	 */
 	public void updateGarbage() {
