@@ -106,15 +106,26 @@ public class Location {
 	 * @return true if current amount is more than the capacity
 	 */
 	public boolean plasticOverflow() {
-		return plasticContainer.getActualAmountGarbage() > plasticContainer.getCapacity();
+		return plasticContainer.isOverflow();
 	}
 
 	/** DO NOT USE FOR PLANNING PURPOSES
-	 * Check if paper is overflowing
+	 * Check if glass is overflowing
 	 * @return true if current amount is more than the capacity
 	 */
 	public boolean glassOverflow() {
-		return glassContainer.getActualAmountGarbage() > glassContainer.getCapacity();
+		return glassContainer.isOverflow();
+	}
+	
+	/**
+	 * Chceck if either plastic or glass flows over
+	 * @return returns 1 if flows over, 0 otherwise
+	 */
+	public int isOverflow() {
+		int result = 0;
+		if (plasticOverflow() || glassOverflow())
+			result = 1;
+		return result;
 	}
 
 	/**
@@ -188,6 +199,7 @@ public class Location {
 			return amountEmptied;
 		}
 	}
+		
 	//--------------Other methods----------------------
 	@Override
 	public String toString() {
