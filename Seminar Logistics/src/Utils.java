@@ -92,6 +92,7 @@ public class Utils {
 	}
 
 	public static void solveTriangleInequality(String travelTime,String outputFile) throws NumberFormatException, IOException {
+		int sum=0;
 		int[][]distances=readTravelTime(travelTime);
 		int[][]newDistances=new int[distances.length][distances.length];
 		int minDistance;
@@ -100,12 +101,14 @@ public class Utils {
 				minDistance=distances[i][j];
 				for(int k = 0; k < distances.length; k++) {
 					if(minDistance > distances[i][k] + distances[k][j]) {
+						sum++;
 						minDistance=distances[i][k] + distances[k][j];
 					}
 				}
 				newDistances[i][j]=minDistance;
 			}
 		}
+		System.out.println("output"+sum);
 		writeFile(newDistances,outputFile);
 	}
 
@@ -120,6 +123,37 @@ public class Utils {
 				}
 				br.newLine();
 			}
+		}
+	}
+	
+	public static List<List<Integer>> readRoutes(String filename) throws IOException{
+		try(BufferedReader scan = new BufferedReader(new FileReader(new File(filename) ))){
+			List<List<Integer>> result= new ArrayList<>(); 
+
+			String newLine;
+			scan.readLine();
+			while((newLine = scan.readLine())!=null) {
+				String[] asciiNumbers = newLine.split(";");
+				List<Integer>route=new ArrayList<>();
+				for(int i = 0; i < asciiNumbers.length; i++) {
+					route.add(Integer.parseInt(asciiNumbers[i]));	
+				}
+				result.add(route);
+			}
+			return result;
+		}
+	}
+	public static List<Integer> readDistances(String filename) throws IOException{
+		try(BufferedReader scan = new BufferedReader(new FileReader(new File(filename) ))){
+			List<Integer> result= new ArrayList<>(); 
+
+			String newLine;
+			scan.readLine();
+			while((newLine = scan.readLine())!=null) {
+				result.add(Integer.parseInt(newLine));	
+				
+			}
+			return result;
 		}
 	}
 	
