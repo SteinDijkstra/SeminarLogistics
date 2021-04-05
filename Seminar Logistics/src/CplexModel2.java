@@ -39,11 +39,11 @@ public class CplexModel2 {
 	private double m = 20;
 	private double recyclingPlastic = 113;
 	private double recyclingGlass = 261;
-	private double M = 100000;
+	private double M = 100;
 
 	
 	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
-		CplexModel2 model= new CplexModel2(Utils.init(),1);
+		CplexModel2 model= new CplexModel2(Utils.init(),2);
 		model.solve();
 		model.debug();
 		//System.out.println(model.cplex.getValue(model.qPlastic[0][0][1]));
