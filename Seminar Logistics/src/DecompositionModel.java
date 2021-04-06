@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import ilog.concert.IloException;
 
@@ -9,7 +10,16 @@ import ilog.concert.IloException;
 public class DecompositionModel {
 	private CplexModelSchedule scheduleModel;
 	private Graph graph;
+	private final double ZVALUE = 1.645;
+	private final double ALPHA = 1; // Please do not change without thinking very deeply (and asking Marja or Manuela)
 	private List<List<Integer>>possibleRoutes;
+
+	private List<Double> averagePDays;
+	private List<Double> averageGDays;
+	private List<Double> lastEmptiedPlasticTime;
+	private List<Double> lastEmptiedGlassTime;
+	private List<Double> lastEmptiedPlasticAmount;
+	private List<Double> lastEmptiedGlassAmount;
 
 	// WARNING: a container is emptied only once within time horizon, so do not set higher than interval emptying time of most emptied container
 	private int timeHorizon; //rolling horizon
@@ -22,6 +32,7 @@ public class DecompositionModel {
 	private static int recyclingGlass = 261;
 	private int runningTime;
 	//Statistics:
+	
 	
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
@@ -42,7 +53,9 @@ public class DecompositionModel {
 	}
 	
 	// General constructor
-	public DecompositionModel(Graph instance, String routeFileName, String plasticDistanceFileName, String glassDistanceFileName, int timeHorizon, int maxDeviationTime) throws NumberFormatException, IloException, IOException {
+	public DecompositionModel(Graph instance, String routeFileName, String plasticDistanceFileName, String glassDistanceFileName, String avgPDaysFileName, String avgGDaysFileName, int timeHorizon, int maxDeviationTime) throws NumberFormatException, IloException, IOException {
+		this.averagePDays = Utils.readAverageDays(avgPDaysFileName);
+		this.averageGDays = Utils.readAverageDays(avgGDaysFileName);
 		scheduleModel = new CplexModelSchedule(instance, routeFileName, plasticDistanceFileName, glassDistanceFileName, timeHorizon, maxDeviationTime);
 		ExactSmall.setModel(instance);
 
@@ -54,19 +67,37 @@ public class DecompositionModel {
 	
 	// Short specific constructor with predefined file names
 	public DecompositionModel(int timeHorizon, int maxTimeDeviation) throws NumberFormatException, IOException, IloException {
+		this.averagePDays = Utils.readAverageDays("daysbeforeempty_plastic.csv");
+		this.averageGDays = Utils.readAverageDays("daysbeforeempty_glass.csv");
 		graph = Utils.init();
-		scheduleModel = new CplexModelSchedule(graph,"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",timeHorizon, maxTimeDeviation);
+		scheduleModel = new CplexModelSchedule(graph,"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv", timeHorizon, maxTimeDeviation);
 		ExactSmall.setModel(graph);
 		possibleRoutes = Utils.readRoutes("allRoutesBasic.csv");
 		this.timeHorizon = timeHorizon;
 	}
 	
 	public void init() {
+
 		currentCapPlastic=0;
 		runningTime=0;
 		currentCapGlass=0;
 		graph.initGarbageMean();
 		hasPlasticContainer=true;
+		graph.initGarbage();
+		initLastEmptiedTime();
+	}
+	
+	public void initLastEmptiedTime() {
+		// set depot equal to 0.
+		lastEmptiedPlasticTime.set(0, 0.0);
+		lastEmptiedGlassTime.set(0, 0.0);
+		for(int i = 1; i < graph.getLocations().size(); i++) {
+			double valueP = -1* averagePDays.get(i) * graph.getRandom().nextDouble();
+			double valueG = -1* averageGDays.get(i) * graph.getRandom().nextDouble();
+			lastEmptiedPlasticTime.set(i, valueP);
+			lastEmptiedGlassTime.set(i, valueG);
+		}
+
 	}
 
 	
@@ -121,6 +152,7 @@ public class DecompositionModel {
 		List<Integer>glassRoute= ExactSmall.getOptimalRoute();
 		int distanceGlass=ExactSmall.getOptimalTime();
 		
+
 		boolean visitPlasticFacility= (scheduleModel.goToPlasticRecycling().get(0)==1);
 		boolean visitGlassFacility= (scheduleModel.goToGlassRecycling().get(0)==1);
 		//Execute schedule
@@ -144,6 +176,11 @@ public class DecompositionModel {
 			}
 		}
 		System.out.println("");
+
+		// Execute schedule
+		// TODO: don't forget to also update t tilde and z
+		// t tilde = -1 als we 'm daadwerkelijk legen
+
 		
 		
 	}
@@ -158,6 +195,7 @@ public class DecompositionModel {
 		for(List<Integer>route : possibleRoutes) {
 			double currentAmount = 0;
 			double totalExtraPerDay = 0;
+			// Bijhouden hoeveel je per route ophaalt.
 			for(Integer loc : route) {
 				if(isPlastic) {
 					currentAmount += graph.getLocation(loc).getPredictedPlastic();
@@ -186,24 +224,42 @@ public class DecompositionModel {
 			Location loc = graph.getLocation(i);
 			for(int t = 0; t <= timeHorizon; t++) {
 
-				if(isPlastic) {
+				if(isPlastic && !isPriorityPlastic) {
 
 					Container cont = loc.getPlasticContainer();
-					if(loc.getPredictedPlastic() + t*cont.getMeanGarbageDisposed() > cont.getCapacity() && !isPriorityPlastic ) {
+					double value = cont.getMeanGarbageDisposed() * (t - lastEmptiedPlasticTime.get(i)) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t-lastEmptiedPlasticTime.get(i)) + lastEmptiedPlasticAmount.get(i);
+					if(value > cont.getCapacity()*ALPHA) {
 						isPriorityPlastic = true;
-						result[i][t] = 1;
-
+						if(t==0) {
+							// TODO Check if we do a route on day 0
+							result[i][0] = 1;
+						}
+						else {
+							result[i][t-1] = 1;
+						}
 					}
 
 				} 
-				else {
+				else if (!isPlastic && !isPriorityGlass){
 					Container cont = loc.getGlassContainer();
-					if(loc.getPredictedPlastic() + t*cont.getMeanGarbageDisposed() > cont.getCapacity() && !isPriorityGlass ) {
+					double value = cont.getMeanGarbageDisposed() * (t - lastEmptiedGlassTime.get(i)) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t-lastEmptiedGlassTime.get(i)) + lastEmptiedGlassAmount.get(i);
+					if(value > cont.getCapacity()*ALPHA) {
 						isPriorityGlass = true;
-						result[i][t] = 1;
-
+						if(t==0) {
+							// TODO Check if we do a route on day 0
+							result[i][0] = 1;
+						}
+						else {
+							result[i][t-1] = 1;
+						}
 					}
 				}
+			}
+			if(isPlastic) {
+				lastEmptiedPlasticTime.set(i, lastEmptiedPlasticTime.get(i)-1);
+			}
+			else {
+				lastEmptiedGlassTime.set(i, lastEmptiedGlassTime.get(i)-1);
 			}
 		}
 		return result;
