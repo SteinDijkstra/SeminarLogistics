@@ -28,7 +28,6 @@ public class CplexModelSchedule {
 	private List<List<Integer>> possibleRoutes;
 	private List<Integer>glassDistances;
 	private List<Integer>plasticDistances;
-	
 	private int timeHorizon;
 	private int maxDeviationTime;
 	private int numberOfRoutes;
@@ -75,8 +74,7 @@ public class CplexModelSchedule {
 		schedulingConstraints();
 		timeConstraint();
 		addObjective();
-		//cplex.exportModel("schedule.lp");
-		
+		//cplex.exportModel("schedule.lp");	
 	}
 
 	public void addVariables() throws IloException {
@@ -171,6 +169,8 @@ public class CplexModelSchedule {
 		
 	}
 	
+	// Om te bepalen of je naar de facility gaat, houd je rekening met hoeveel je per route ophaalt / gaat ophalen!
+	// Hij lost puzzel op wanneer je best naar recycling facility kunt gaan tov hoeveel je max ophaalt etc.
 	public void capacityConstraints() throws IloException {
 		// Constraint 1: collect at most capacity
 		for (int t = 1; t <= timeHorizon; t++) {
