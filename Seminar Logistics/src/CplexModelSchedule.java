@@ -28,7 +28,7 @@ public class CplexModelSchedule {
 	private List<List<Integer>> possibleRoutes;
 	private List<Integer>glassDistances;
 	private List<Integer>plasticDistances;
-	private static int M =1000;
+	private static int M =75;
 	
 	private int timeHorizon;
 	private int maxDeviationTime;
@@ -120,7 +120,7 @@ public class CplexModelSchedule {
 				gPlastic[r][t] = cplex.numVar(0, capacityTruck,"gp" + r + "," + t);
 				gGlass[r][t] = cplex.numVar(0, capacityTruck,"gg" + r + ","+ t );
 			}
-			for(int i=0;i<nodes;i++) {
+			for(int i=1;i<nodes;i++) {
 				priorityPlastic[i][t]=cplex.boolVar("pp" + i + "," + t);
 				priorityGlass[i][t]=cplex.boolVar("pg" + i + "," + t);
 			}
@@ -143,7 +143,7 @@ public class CplexModelSchedule {
 			}
 		}
 		for(int t=1;t<=timeHorizon;t++) {
-			for(int i=0;i<nodes;i++) {
+			for(int i=1;i<nodes;i++) {
 				if(plasticPriority[i][t]==0) {	
 					priorityPlastic[i][t].setLB(0);priorityPlastic[i][t].setUB(1);
 				} else {
@@ -161,8 +161,8 @@ public class CplexModelSchedule {
 	}
 
 	public void initModel2(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority) throws IloException {
-		int[]lastXPlastic = new int[208];
-		int[]lastXGlass = new int[208];
+		int[]lastXPlastic = new int[garbagePlastic.length];
+		int[]lastXGlass = new int[garbagePlastic.length];
 		initModel(initCapPlastic, initCapGlass,garbagePlastic,garbageGlass, plasticPriority,glassPriority,lastXPlastic,lastXGlass);
 		
 	}

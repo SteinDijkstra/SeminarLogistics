@@ -12,10 +12,15 @@ public class DecompositionModel {
 	private int currentCapGlass=0;
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
-		DecompositionModel model = new DecompositionModel(20,4);
+		DecompositionModel model = new DecompositionModel(1,1);
 		model.init();
 		model.scheduleDay();
-		
+		//Graph graph= Utils.init();
+		//DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv", 11, 2);
+		//model2.init();
+		//model2.scheduleDay();
+		//model2.init();
+		//model2.scheduleDay();
 	}
 	
 	public DecompositionModel(Graph instance, String routeFileName, String plasticDistanceFileName,String glassDistanceFileName, int timeHorizon, int maxDeviationTime) throws NumberFormatException, IloException, IOException {
@@ -45,9 +50,9 @@ public class DecompositionModel {
 		int[][] priorityPlastic=determinePriority(true);
 		for(int t=0;t<=timeHorizon;t++) {
 			System.out.println("plastic Priority day "+t+": ");
-			for(int i=0;i<graph.getLocations().size()-1;i++) {
+			for(int i=1;i<graph.getLocations().size();i++) {
 				if(priorityPlastic[i][t]==1) {
-					System.out.println((i+1)+", ");//TODO: Check 
+					System.out.println((i)+", ");//TODO: Check 
 				}
 			}
 		}
@@ -98,7 +103,7 @@ public class DecompositionModel {
 	}
 	
 	public int[][] determinePriority(boolean isPlastic){
-		int[][]result= new int[graph.getLocations().size()-1][timeHorizon+1];
+		int[][]result= new int[graph.getLocations().size()][timeHorizon+1];
 		for(int i=1;i<graph.getLocations().size();i++) {
 			boolean isPriorityPlastic=false;
 			boolean isPriorityGlass=false;
@@ -108,17 +113,17 @@ public class DecompositionModel {
 					Container cont=loc.getPlasticContainer();
 					if(loc.getPredictedPlastic()+t*cont.getMeanGarbageDisposed()>cont.getCapacity() &&!isPriorityPlastic ) {
 						isPriorityPlastic=true;
-						result[i-1][t]=1;
+						result[i][t]=1;
 					} else {
-						result[i-1][t]=0;
+						result[i][t]=0;
 					}
 				} else {
 					Container cont=loc.getGlassContainer();
 					if(loc.getPredictedPlastic()+t*cont.getMeanGarbageDisposed()>cont.getCapacity() &&!isPriorityGlass ) {
 						isPriorityGlass=true;
-						result[i-1][t]=1;
+						result[i][t]=1;
 					} else {
-						result[i-1][t]=0;
+						result[i][t]=0;
 					}
 				}
 			}
