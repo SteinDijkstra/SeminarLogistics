@@ -37,7 +37,7 @@ public class CplexModelSchedule {
 	private double capacityTruck = 75;
 	private double recyclingPlastic = 113;
 	private double recyclingGlass = 261;
-	private double maxTimeUsage = 480;
+	private double maxTimeUsage = 440;
 
 //	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
 //		CplexModelSchedule model = new CplexModelSchedule(Utils.init(),"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",1,1);
@@ -171,6 +171,7 @@ public class CplexModelSchedule {
 			}
 		}
 		cplex.exportModel("schedule.lp");
+		cplex.setOut(null);
 	}
 
 	public void initModel2(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority) throws IloException {
@@ -322,6 +323,17 @@ public class CplexModelSchedule {
 		List<Integer> result= new ArrayList<>();
 		for(int t=1;t<=timeHorizon;t++) {
 			if(cplex.getValue(etaPlastic[t])>0.5) {
+				result.add(1);
+			} else {
+				result.add(0);
+			}
+		}
+		return result;
+	}
+	public List<Integer> goToGlassRecycling() throws UnknownObjectException, IloException{
+		List<Integer> result= new ArrayList<>();
+		for(int t=1;t<=timeHorizon;t++) {
+			if(cplex.getValue(etaGlass[t])>0.5) {
 				result.add(1);
 			} else {
 				result.add(0);

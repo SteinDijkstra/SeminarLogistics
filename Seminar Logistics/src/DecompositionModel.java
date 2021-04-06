@@ -13,20 +13,30 @@ public class DecompositionModel {
 
 	// WARNING: a container is emptied only once within time horizon, so do not set higher than interval emptying time of most emptied container
 	private int timeHorizon; //rolling horizon
-	private int currentCapPlastic=0; //ct0
-
-	private int currentCapGlass=0;
+	private int currentCapPlastic; //ct0
+	private int currentCapGlass;
+	private boolean hasPlasticContainer;
+	private static int TOTALRUNNINGDAYS=10;
+	private static int MAXCAPACITYCONTAINER=75;
+	private static int recyclingPlastic = 113;
+	private static int recyclingGlass = 261;
+	private int runningTime;
+	//Statistics:
+	
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
 
 		DecompositionModel model = new DecompositionModel(1,1);
 
-		model.init();
-		model.scheduleDay();
-		//Graph graph= Utils.init();
-		//DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv", 11, 2);
-		//model2.init();
-		//model2.scheduleDay();
+		//model.init();
+		//model.scheduleDay();
+		Graph graph= Utils.init();
+		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv",6, 4);
+		model2.init();
+		model2.scheduleDay();
+		model2.scheduleDay();
+		model2.scheduleDay();
+		model2.scheduleDay();
 		//model2.init();
 		//model2.scheduleDay();
 	}
@@ -52,15 +62,20 @@ public class DecompositionModel {
 	}
 	
 	public void init() {
-		graph.initGarbage();
+		currentCapPlastic=0;
+		runningTime=0;
+		currentCapGlass=0;
+		graph.initGarbageMean();
+		hasPlasticContainer=true;
 	}
+
 	
 	/** In this method we collect all parts, we determine the garbage, we schedule the priorities to right days, we route, we execute and then update for next day
 	 * @throws IloException
 	 */
 	public void scheduleDay() throws IloException {
+		graph.updateGarbage();
 		//Determine garbage per route
-
 		double[][] garbagePlastic = determineGarbage(true);
 		double[][] garbageGlass = determineGarbage(false);
 		//Determine priorities per day (for now based on expected garbage per route)
@@ -93,14 +108,43 @@ public class DecompositionModel {
 		scheduleModel.initModel2(currentCapPlastic, currentCapGlass, garbagePlastic, garbageGlass, priorityPlastic, priorityGlass);
 		scheduleModel.solve();
 		
-		System.out.println(scheduleModel.plasticLocToVisit(1));
-		System.out.println(scheduleModel.glassLocToVisit(1));
-		System.out.println(scheduleModel.goToPlasticRecycling());
+		
+		
+		//System.out.println(scheduleModel.plasticLocToVisit(1));
+		//System.out.println(scheduleModel.glassLocToVisit(1));
+		//System.out.println(scheduleModel.goToPlasticRecycling());
 		//Route schedule
+		ExactSmall.solve(true,scheduleModel.plasticLocToVisit(1));
+		List<Integer>plasticRoute= ExactSmall.getOptimalRoute();
+		int distancePlastic=ExactSmall.getOptimalTime();
+		ExactSmall.solve(false,scheduleModel.glassLocToVisit(1));
+		List<Integer>glassRoute= ExactSmall.getOptimalRoute();
+		int distanceGlass=ExactSmall.getOptimalTime();
 		
+		boolean visitPlasticFacility= (scheduleModel.goToPlasticRecycling().get(0)==1);
+		boolean visitGlassFacility= (scheduleModel.goToGlassRecycling().get(0)==1);
 		//Execute schedule
+		executeRoute(plasticRoute,glassRoute,visitPlasticFacility,visitGlassFacility,distancePlastic,distanceGlass);
+		//Show overflows:
+		System.out.print("plastic Overflow: ");
+		int i=0;
+		for(Location loc:graph.getLocations()) {
+			i++;
+			if(loc.getActualPlastic()>loc.getPlasticContainer().getCapacity()) {
+				System.out.print(i+", ");
+			}
+		}
+		System.out.println("");
+		System.out.print("Glass Overflow: ");
+		 i=0;
+		for(Location loc:graph.getLocations()) {
+			i++;
+			if(loc.getActualGlass()>loc.getGlassContainer().getCapacity()) {
+				System.out.print(i+", ");
+			}
+		}
+		System.out.println("");
 		
-		//update for next day
 		
 	}
 	
@@ -163,5 +207,42 @@ public class DecompositionModel {
 			}
 		}
 		return result;
+	}
+	
+	public void executeRoute(List<Integer>plasticRoute, List<Integer>glassRoute, boolean toPlasticFacility, boolean toGlassFacility, int distPlastic, int distGlass) {
+		//Execute recycling
+		if(toPlasticFacility) {
+			currentCapPlastic=0;
+			runningTime+=recyclingPlastic;
+		}
+		if(toGlassFacility) {
+			currentCapGlass=0;
+			runningTime+=recyclingGlass;
+		}
+		//Execute Route
+		for(Integer locNumber:plasticRoute) {
+			currentCapPlastic+=graph.getLocation(locNumber).emptyPlastic(MAXCAPACITYCONTAINER-currentCapPlastic);
+		}
+		for(Integer locNumber:glassRoute) {
+			currentCapPlastic+=graph.getLocation(locNumber).emptyPlastic(MAXCAPACITYCONTAINER-currentCapPlastic);
+		}
+		runningTime+=distPlastic+distGlass;
+		//Determine number of swaps
+		//Swap 1:
+		if(hasPlasticContainer&&toGlassFacility) {
+			runningTime+=20;
+			hasPlasticContainer=false;
+		}else if(!hasPlasticContainer&&toPlasticFacility) {
+			runningTime+=20;
+			hasPlasticContainer=true;
+		}
+		//Swap2:
+		if(hasPlasticContainer&&glassRoute.size()>0) {
+			runningTime+=20;
+			hasPlasticContainer=false;
+		}else if(!hasPlasticContainer&&plasticRoute.size()>0) {
+			runningTime+=20;
+			hasPlasticContainer=true;
+		}
 	}
 }
