@@ -8,6 +8,8 @@ import java.util.List;
  * and then enumerates all possible routes recursively, for the sake of efficiency.
  * @author Stein
  */
+
+// TSP door klein aantal punten
 public class ExactSmall {
 	private static Graph model; // TODO initialize right graph
 	private static int optimalTime = Integer.MAX_VALUE;
@@ -33,6 +35,7 @@ public class ExactSmall {
 	 * @param isPlastic boolean plastic or not; necessary for picking right containers on location.
 	 */
 	public static void solve(List<Location> toVisit, boolean isPlastic) {
+		System.out.println(toVisit.size());
 		List<Integer> currentRoute = new ArrayList<>();
 		// We start at the depot
 		currentRoute.add(0);
