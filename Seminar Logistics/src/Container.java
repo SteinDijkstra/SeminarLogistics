@@ -125,6 +125,10 @@ public class Container {
 		return this.meanGarbageDisposed;
 	}
 
+	public double getStdGarbageDisposed() {
+		return this.stdGarbageDisposed;
+	}
+	
 	//--------------Utility methods--------------------
 	/**
 	 * Update predicted and actual amount of garbage. the randomNumber should be a based on a

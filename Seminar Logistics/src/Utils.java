@@ -156,5 +156,19 @@ public class Utils {
 			return result;
 		}
 	}
-	
+	public static List<Double> readAverageDays(String filename) throws IOException {
+		try(BufferedReader scan = new BufferedReader(new FileReader(new File(filename) ))){
+			List<Double> result= new ArrayList<>(); 
+			String newLine;
+			// Add 0 for depot
+			result.add(0.0);
+			while((newLine = scan.readLine())!=null) {
+				String[] asciiNumbers = newLine.split(";");
+				for(int i = 0; i < asciiNumbers.length; i++) {
+					result.add(Double.parseDouble(asciiNumbers[i]));	
+				}
+			}
+			return result;
+		}
+	}
 }
