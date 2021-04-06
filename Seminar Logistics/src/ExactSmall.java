@@ -8,6 +8,8 @@ import java.util.List;
  * and then enumerates all possible routes recursively, for the sake of efficiency.
  * @author Stein
  */
+
+// TSP door klein aantal punten
 public class ExactSmall {
 	private static Graph model; // TODO initialize right graph
 	private static int optimalTime = Integer.MAX_VALUE;
