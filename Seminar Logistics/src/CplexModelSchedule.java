@@ -28,6 +28,7 @@ public class CplexModelSchedule {
 	private List<List<Integer>> possibleRoutes;
 	private List<Integer>glassDistances;
 	private List<Integer>plasticDistances;
+	private static int M =1000;
 	
 	private int timeHorizon;
 	private int maxDeviationTime;
@@ -36,26 +37,26 @@ public class CplexModelSchedule {
 	private double capacityTruck = 75;
 	private double recyclingPlastic = 113;
 	private double recyclingGlass = 261;
-	private double maxTimeUsage = 440;
+	private double maxTimeUsage = 480;
 
-	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
-		CplexModelSchedule model = new CplexModelSchedule(Utils.init(),"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",1,1);
-		double [][] garbagePlastic=new double[208][2];
-		garbagePlastic[1][1]=1.5;
-		double [][] garbageGlass= new double[208][2];
-		garbageGlass[1][1]=1.0;
-		int [][] plasticPriority= new int[208][2];
-		plasticPriority[1][1]=1;
-		int [][] glassPriority = new int[208][2];
-		glassPriority[1][1]=1;
-		int[] lastXPlastic= new int[208];
-		int [] lastXGlass= new int[208];
-		model.initModel(0, 0, garbagePlastic, garbageGlass, plasticPriority, glassPriority, lastXPlastic, lastXGlass);
-		//CplexModel2 model= new CplexModel2(Utils.init(),2);
-		model.solve();
-		System.out.println(model.getObjective());
-		//System.out.println(model.schedulePlastic());
-	}
+//	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
+//		CplexModelSchedule model = new CplexModelSchedule(Utils.init(),"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",1,1);
+//		double [][] garbagePlastic=new double[208][2];
+//		garbagePlastic[1][1]=1.5;
+//		double [][] garbageGlass= new double[208][2];
+//		garbageGlass[1][1]=1.0;
+//		int [][] plasticPriority= new int[208][2];
+//		plasticPriority[1][1]=1;
+//		int [][] glassPriority = new int[208][2];
+//		glassPriority[1][1]=1;
+//		int[] lastXPlastic= new int[208];
+//		int [] lastXGlass= new int[208];
+//		model.initModel(0, 0, garbagePlastic, garbageGlass, plasticPriority, glassPriority, lastXPlastic, lastXGlass);
+//		//CplexModel2 model= new CplexModel2(Utils.init(),2);
+//		model.solve();
+//		System.out.println(model.getObjective());
+//		//System.out.println(model.schedulePlastic());
+//	}
 
 	public CplexModelSchedule(Graph instance, String routeFileName, String plasticDistanceFileName,String glassDistanceFileName, int timeHorizon,int maxTimeDeviation) throws IloException, NumberFormatException, IOException {
 		this.instance=instance;
@@ -75,7 +76,7 @@ public class CplexModelSchedule {
 		schedulingConstraints();
 		timeConstraint();
 		addObjective();
-		cplex.exportModel("schedule.lp");
+		//cplex.exportModel("schedule.lp");
 		
 	}
 
@@ -101,8 +102,11 @@ public class CplexModelSchedule {
 			xGlass[r][0] = cplex.boolVar("xg"+r+","+0);
 			gPlastic[r][0] = cplex.numVar(0, capacityTruck,"gp" + r + "," + 0);
 			gGlass[r][0] = cplex.numVar(0, capacityTruck,"gg" + r + ","+ 0);
-			priorityPlastic[r][0]=cplex.boolVar("pp" + r + "," + 0);
-			priorityGlass[r][0]=cplex.boolVar("pg" + r + "," + 0);
+
+		}
+		for(int i=0;i<nodes;i++) {
+			priorityPlastic[i][0]=cplex.boolVar("pp" + i + "," + 0);
+			priorityGlass[i][0]=cplex.boolVar("pg" + i + "," + 0);
 		}
 		//for all other periods:
 		for(int t = 1; t <= timeHorizon; t++) {
@@ -115,8 +119,10 @@ public class CplexModelSchedule {
 				xGlass[r][t] = cplex.boolVar("xg"+r+","+t);
 				gPlastic[r][t] = cplex.numVar(0, capacityTruck,"gp" + r + "," + t);
 				gGlass[r][t] = cplex.numVar(0, capacityTruck,"gg" + r + ","+ t );
-				priorityPlastic[r][t]=cplex.boolVar("pp" + r + "," + t);
-				priorityGlass[r][t]=cplex.boolVar("pg" + r + "," + t);
+			}
+			for(int i=0;i<nodes;i++) {
+				priorityPlastic[i][t]=cplex.boolVar("pp" + i + "," + t);
+				priorityGlass[i][t]=cplex.boolVar("pg" + i + "," + t);
 			}
 		}
 	}
@@ -124,7 +130,7 @@ public class CplexModelSchedule {
 	public void initModel(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority, int[]lastXPlastic, int[]lastXGlass) throws IloException {
 		//Set initial values to 0.
 		cPlastic[0].setLB(initCapPlastic);cPlastic[0].setUB(initCapPlastic);
-		cGlass[0].setLB(initCapGlass);cGlass[0].setLB(initCapGlass);
+		cGlass[0].setLB(initCapGlass);cGlass[0].setUB(initCapGlass);
 		for(int r=0;r<numberOfRoutes;r++) {
 			xPlastic[r][0].setLB(lastXPlastic[r]);xPlastic[r][0].setUB(lastXPlastic[r]);
 			xGlass[r][0].setLB(lastXGlass[r]);xGlass[r][0].setUB(lastXGlass[r]);
@@ -151,7 +157,7 @@ public class CplexModelSchedule {
 				
 			}
 		}
-		
+		cplex.exportModel("schedule.lp");
 	}
 
 	public void initModel2(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority) throws IloException {
@@ -207,10 +213,10 @@ public class CplexModelSchedule {
 				sump = cplex.sum(sump, cplex.prod(gPlastic[r][t-1], xPlastic[r][t-1]));
 				sumg = cplex.sum(sumg, cplex.prod(gGlass[r][t-1], xGlass[r][t-1]));
 			}
-			sump = cplex.sum(sump, cplex.prod(-capacityTruck, etaPlastic[t]));
-			sumg = cplex.sum(sumg, cplex.prod(-capacityTruck, etaGlass[t]));
-			cplex.addLe(cPlastic[t], sump);
-			cplex.addLe(cGlass[t], sumg);
+			sump = cplex.sum(sump, cplex.prod(-M, etaPlastic[t]));
+			sumg = cplex.sum(sumg, cplex.prod(-M, etaGlass[t]));
+			cplex.addGe(cPlastic[t], sump);
+			cplex.addGe(cGlass[t], sumg);
 		}
 		
 		
@@ -232,7 +238,7 @@ public class CplexModelSchedule {
 				for(int k=0;k<=maxDeviationTime;k++) {
 					if(t-k>0) {
 						for(int r=0;r<numberOfRoutes;r++) {
-							if(possibleRoutes.get(r).contains(i)) {
+							if(possibleRoutes.get(r).contains((Integer)i+1)) {
 								sumpMust=cplex.sum(sumpMust, xPlastic[r][t-k]);
 								sumgMust=cplex.sum(sumgMust, xGlass[r][t-k]);
 							}
@@ -290,6 +296,18 @@ public class CplexModelSchedule {
 		for(int r=0;r<numberOfRoutes;r++) {
 			if(cplex.getValue(xGlass[r][day])>0.5) {
 				result.addAll(possibleRoutes.get(r));
+			}
+		}
+		return result;
+	}
+	
+	public List<Integer> goToPlasticRecycling() throws UnknownObjectException, IloException{
+		List<Integer> result= new ArrayList<>();
+		for(int t=1;t<=timeHorizon;t++) {
+			if(cplex.getValue(etaPlastic[t])>0.5) {
+				result.add(1);
+			} else {
+				result.add(0);
 			}
 		}
 		return result;

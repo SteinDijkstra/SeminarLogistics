@@ -8,11 +8,11 @@ public class DecompositionModel {
 	private Graph graph;
 	private List<List<Integer>>possibleRoutes;
 	private int timeHorizon;
-	private int currentCapPlastic;
-	private int currentCapGlass;
+	private int currentCapPlastic=0;
+	private int currentCapGlass=0;
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
-		DecompositionModel model = new DecompositionModel(12,4);
+		DecompositionModel model = new DecompositionModel(20,4);
 		model.init();
 		model.scheduleDay();
 		
@@ -21,6 +21,7 @@ public class DecompositionModel {
 	public DecompositionModel(Graph instance, String routeFileName, String plasticDistanceFileName,String glassDistanceFileName, int timeHorizon, int maxDeviationTime) throws NumberFormatException, IloException, IOException {
 		scheduleModel=new CplexModelSchedule( instance, routeFileName, plasticDistanceFileName, glassDistanceFileName, timeHorizon, maxDeviationTime);
 		ExactSmall.setModel(instance);
+		possibleRoutes=Utils.readRoutes(routeFileName);
 		graph=instance;
 		this.timeHorizon=timeHorizon;
 	}
@@ -46,7 +47,7 @@ public class DecompositionModel {
 			System.out.println("plastic Priority day "+t+": ");
 			for(int i=0;i<graph.getLocations().size()-1;i++) {
 				if(priorityPlastic[i][t]==1) {
-					System.out.println((i+1)+", ");
+					System.out.println((i+1)+", ");//TODO: Check 
 				}
 			}
 		}
@@ -55,7 +56,7 @@ public class DecompositionModel {
 			System.out.println("glass Priority day "+t+": ");
 			for(int i=0;i<graph.getLocations().size()-1;i++) {
 				if(priorityGlass[i][t]==1) {
-					System.out.println((i+1)+", ");
+					System.out.println((i)+", ");
 				}
 			}
 		}
@@ -65,6 +66,7 @@ public class DecompositionModel {
 		
 		System.out.println(scheduleModel.plasticLocToVisit(1));
 		System.out.println(scheduleModel.glassLocToVisit(1));
+		System.out.println(scheduleModel.goToPlasticRecycling());
 		//Route schedule
 		
 		//Execute schedule
@@ -96,23 +98,24 @@ public class DecompositionModel {
 	}
 	
 	public int[][] determinePriority(boolean isPlastic){
-		int[][]result= new int[graph.getLocations().size()][timeHorizon+1];
+		int[][]result= new int[graph.getLocations().size()-1][timeHorizon+1];
 		for(int i=1;i<graph.getLocations().size();i++) {
-			boolean isPriority=false;
+			boolean isPriorityPlastic=false;
+			boolean isPriorityGlass=false;
 			Location loc=graph.getLocation(i);
 			for(int t=0;t<=timeHorizon;t++) {
 				if(isPlastic) {
 					Container cont=loc.getPlasticContainer();
-					if(loc.getPredictedPlastic()+t*cont.getMeanGarbageDisposed()>cont.getCapacity() &&!isPriority ) {
-						isPriority=true;
+					if(loc.getPredictedPlastic()+t*cont.getMeanGarbageDisposed()>cont.getCapacity() &&!isPriorityPlastic ) {
+						isPriorityPlastic=true;
 						result[i-1][t]=1;
 					} else {
 						result[i-1][t]=0;
 					}
 				} else {
 					Container cont=loc.getGlassContainer();
-					if(loc.getPredictedPlastic()+t*cont.getMeanGarbageDisposed()>cont.getCapacity() &&!isPriority ) {
-						isPriority=true;
+					if(loc.getPredictedPlastic()+t*cont.getMeanGarbageDisposed()>cont.getCapacity() &&!isPriorityGlass ) {
+						isPriorityGlass=true;
 						result[i-1][t]=1;
 					} else {
 						result[i-1][t]=0;
