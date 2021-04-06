@@ -42,7 +42,7 @@ public class DecompositionModel {
 		//model.init();
 		//model.scheduleDay();
 		Graph graph= Utils.init();
-		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv",6, 4);
+		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv","daysbeforeempty_plastic.csv","daysbeforeempty_glass.csv",6, 4);
 		model2.init();
 		model2.scheduleDay();
 		model2.scheduleDay();
