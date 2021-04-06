@@ -17,6 +17,7 @@ public class Test {
 	}
 	
 	public static boolean testTriangleInequality(int[][]travelTimes) {
+		int sum=0;
 		for(int i = 0; i < travelTimes.length; i++) {
 			for(int j = 0; j < travelTimes.length; j++) {
 				for(int k = 0; k < travelTimes.length; k++) {
@@ -24,11 +25,12 @@ public class Test {
 						System.out.println("from " + i + " to " + j + " takes " + travelTimes[i][j] + " minutes");
 						System.out.println("from " + i + " to " + j + " via " + k + " takes " + travelTimes[i][k] 
 								+ " + " + travelTimes[k][j] + " minutes");
-						return false;
+						sum++;
 					}
 				}
 			}
 		}
+		System.out.println(sum);
 		return true;
 	}
 }
