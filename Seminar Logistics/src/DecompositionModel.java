@@ -37,7 +37,7 @@ public class DecompositionModel {
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
 
-		DecompositionModel model = new DecompositionModel(1,1);
+		//DecompositionModel model = new DecompositionModel(1,1);
 
 		//model.init();
 		//model.scheduleDay();
@@ -46,8 +46,7 @@ public class DecompositionModel {
 		model2.init();
 		model2.scheduleDay();
 		model2.scheduleDay();
-		model2.scheduleDay();
-		model2.scheduleDay();
+
 		//model2.init();
 		//model2.scheduleDay();
 	}
