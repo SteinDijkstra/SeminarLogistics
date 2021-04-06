@@ -219,8 +219,8 @@ public class CplexModelSchedule {
 			}
 			sump = cplex.sum(sump, cplex.prod(-capacityTruck, etaPlastic[t]));
 			sumg = cplex.sum(sumg, cplex.prod(-capacityTruck, etaGlass[t]));
-			cplex.addLe(cPlastic[t], sump);
-			cplex.addLe(cGlass[t], sumg);
+			cplex.addGe(cPlastic[t], sump);
+			cplex.addGe(cGlass[t], sumg);
 		}	
 		
 		for(int t = 1; t <= timeHorizon; t++) {

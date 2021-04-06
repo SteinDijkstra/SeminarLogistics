@@ -16,7 +16,7 @@ public class DecompositionModel {
 	private int currentCapGlass=0;
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
-		DecompositionModel model = new DecompositionModel(20,4);
+		DecompositionModel model = new DecompositionModel(10,4);
 		model.init();
 		model.scheduleDay();
 		
