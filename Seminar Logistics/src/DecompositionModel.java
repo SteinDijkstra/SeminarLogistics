@@ -108,8 +108,8 @@ public class DecompositionModel {
 		lastEmptiedPlasticTime.add(0);
 		lastEmptiedGlassTime.add(0);
 		for(int i = 1; i < graph.getLocations().size(); i++) {
-			int valueP=averagePDays.get(i)<=0.0001?0:-1*graph.getRandom().nextInt((int)Math.ceil(averagePDays.get(i)));
-			int valueG=averageGDays.get(i)<=0.0001?0: -1*graph.getRandom().nextInt((int)Math.ceil(averageGDays.get(i)));
+			int valueP=averagePDays.get(i)<=0.0001?0:-1*graph.getRandom().nextInt((int)Math.floor(averagePDays.get(i)));// TODO: waarom floor?
+			int valueG=averageGDays.get(i)<=0.0001?0: -1*graph.getRandom().nextInt((int)Math.floor(averageGDays.get(i)));
 			lastEmptiedPlasticTime.add(valueP);
 			lastEmptiedGlassTime.add(valueG);
 		}
@@ -215,14 +215,12 @@ public class DecompositionModel {
 	}
 
 	public int[][] determinePriority(boolean isPlastic){
-		
 		int[][]result = new int[graph.getLocations().size()][timeHorizon+1];
 		for(int i = 1; i < graph.getLocations().size(); i++) {
 			// This boolean makes sure we only empty a container once in the sliding time window!
 			boolean isPriorityPlastic = false;
 			boolean isPriorityGlass = false;
 			Location loc = graph.getLocation(i);
-			
 			for(int t = 0; t <= timeHorizon; t++) {
 				if(isPlastic && !isPriorityPlastic) {
 					int tTilde = lastEmptiedPlasticTime.get(i);
@@ -248,7 +246,7 @@ public class DecompositionModel {
 					}
 				} 
 				else if (!isPlastic && !isPriorityGlass){
-					int tTilde = lastEmptiedPlasticTime.get(i);
+					int tTilde = lastEmptiedGlassTime.get(i);
 					int weekends = (t - tTilde) / 5; // Floor function not necessary in int value
 					int dayT = (this.day+t-1)%5;
 					int dayTTilde = (this.day+tTilde-1)%5;
