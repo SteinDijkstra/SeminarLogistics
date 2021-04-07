@@ -10,11 +10,11 @@ import java.util.List;
  *
  */
 public class IntuitiveApproach {
-	private final static double ALPHA = 0.9;
-	private final static double BETA = 1;
-	private final static int DELTA = 10;
-	private final static int ETA = 10; // glass parameter
-	private final static int THETA = 10;
+	private final static double ALPHA = 0.95;
+	private final static double BETA = 0.95;
+	private final static int DELTA = 11;
+	private final static int ETA = 11; // glass parameter
+	private final static int THETA = 20;
 	private static Graph graph;
 	private static int nodes;
 	private static int timeHorizon;
