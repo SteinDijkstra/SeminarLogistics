@@ -9,11 +9,8 @@ import ilog.concert.IloException;
 public class DecompositionModel {
 	private CplexModelSchedule scheduleModel;
 	private Graph graph;
-<<<<<<< HEAD
+
 	private final double ZVALUE =1.645;//= 1.645; //Th
-=======
-	private final double ZVALUE =1.645;//= 1.645;
->>>>>>> refs/remotes/origin/Marja
 	private final double ALPHA = 1; // Please do not change without thinking very deeply (and asking Marja or Manuela)
 	private List<List<Integer>> possibleRoutes;
 	private List<Double> averagePDays;
@@ -48,6 +45,7 @@ public class DecompositionModel {
 		Graph graph= Utils.init();
 
 		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv","daysbeforeempty_plastic.csv","daysbeforeempty_glass.csv", TIMEHORIZON, MAXTIMEDEV);
+		model2.run();
 		System.out.print(model2.runningTime);
 		//model2.init();
 		//model2.scheduleDay();
