@@ -132,7 +132,7 @@ public class DecompositionModel {
 		
 		//Route schedule
 		ExactSmall.solve(true,scheduleModel.plasticLocToVisit(1));
-		List<Integer>plasticRoute= ExactSmall.getOptimalRoute();
+		List<Integer> plasticRoute = ExactSmall.getOptimalRoute();
 		int distancePlastic=ExactSmall.getOptimalTime();
 		ExactSmall.solve(false,scheduleModel.glassLocToVisit(1));
 		List<Integer>glassRoute= ExactSmall.getOptimalRoute();
@@ -153,7 +153,7 @@ public class DecompositionModel {
 		}
 		System.out.println("");
 		System.out.print("Glass Overflow: ");
-		 i=0;
+		i=0;
 		for(Location loc:graph.getLocations()) {
 			i++;
 			if(loc.getActualGlass()>loc.getGlassContainer().getCapacity()) {
