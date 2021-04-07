@@ -1,19 +1,16 @@
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
-
 import ilog.concert.IloException;
 
 /**
- * @author Stein
+ * @author Stein, Marja, Manuela
  */
 public class DecompositionModel {
 	private CplexModelSchedule scheduleModel;
 	private Graph graph;
 	private final double ZVALUE = 1.645;
 	private final double ALPHA = 1; // Please do not change without thinking very deeply (and asking Marja or Manuela)
-	private List<List<Integer>>possibleRoutes;
-
+	private List<List<Integer>> possibleRoutes;
 	private List<Double> averagePDays;
 	private List<Double> averageGDays;
 	private List<Double> lastEmptiedPlasticTime;
@@ -34,11 +31,8 @@ public class DecompositionModel {
 	//Statistics:
 	
 	
-	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
-
 		//DecompositionModel model = new DecompositionModel(1,1);
-
 		//model.init();
 		//model.scheduleDay();
 		Graph graph= Utils.init();
@@ -46,7 +40,6 @@ public class DecompositionModel {
 		model2.init();
 		model2.scheduleDay();
 		model2.scheduleDay();
-
 		//model2.init();
 		//model2.scheduleDay();
 	}
@@ -57,11 +50,9 @@ public class DecompositionModel {
 		this.averageGDays = Utils.readAverageDays(avgGDaysFileName);
 		scheduleModel = new CplexModelSchedule(instance, routeFileName, plasticDistanceFileName, glassDistanceFileName, timeHorizon, maxDeviationTime);
 		ExactSmall.setModel(instance);
-
 		graph = instance;
 		possibleRoutes = Utils.readRoutes(routeFileName);
 		this.timeHorizon = timeHorizon;
-
 	}
 	
 	// Short specific constructor with predefined file names
@@ -76,7 +67,6 @@ public class DecompositionModel {
 	}
 	
 	public void init() {
-
 		currentCapPlastic=0;
 		runningTime=0;
 		currentCapGlass=0;
@@ -86,8 +76,12 @@ public class DecompositionModel {
 		initLastEmptiedTime();
 	}
 	
+	/**
+	 * Method that initializes time t tilde, the last time a cube is emptied
+	 * Number is chosen such that is uniformly distributed over the average time needed before it should be emptied
+	 */
 	public void initLastEmptiedTime() {
-		// set depot equal to 0.
+		// set depot equal to 0
 		lastEmptiedPlasticTime.set(0, 0.0);
 		lastEmptiedGlassTime.set(0, 0.0);
 		for(int i = 1; i < graph.getLocations().size(); i++) {
@@ -96,11 +90,10 @@ public class DecompositionModel {
 			lastEmptiedPlasticTime.set(i, valueP);
 			lastEmptiedGlassTime.set(i, valueG);
 		}
-
 	}
-
 	
-	/** In this method we collect all parts, we determine the garbage, we schedule the priorities to right days, we route, we execute and then update for next day
+	/** 
+	 * In this method we collect all parts, we determine the garbage, we schedule the priorities to right days, we route, we execute and then update for next day
 	 * @throws IloException
 	 */
 	public void scheduleDay() throws IloException {
@@ -117,32 +110,26 @@ public class DecompositionModel {
 			for(int i = 0; i < graph.getLocations().size(); i++) {
 				if(priorityPlastic[i][t] == 1) {
 					System.out.print(i+", ");
-
 				}
 			}
 			System.out.println();
 		}
-
 		for(int t = 0; t <= timeHorizon; t++) {
 			System.out.print("glass Priority day " + t + ": ");
 			for(int i = 0; i < graph.getLocations().size(); i++) {
 				if(priorityGlass[i][t] == 1) {
 					System.out.print(i + ", ");
-
 				}
 			}
 			System.out.println();
 		}
-		
 		//Determine Schedule
 		scheduleModel.initModel2(currentCapPlastic, currentCapGlass, garbagePlastic, garbageGlass, priorityPlastic, priorityGlass);
 		scheduleModel.solve();
-		
-		
-		
 		//System.out.println(scheduleModel.plasticLocToVisit(1));
 		//System.out.println(scheduleModel.glassLocToVisit(1));
 		//System.out.println(scheduleModel.goToPlasticRecycling());
+		
 		//Route schedule
 		ExactSmall.solve(true,scheduleModel.plasticLocToVisit(1));
 		List<Integer>plasticRoute= ExactSmall.getOptimalRoute();
@@ -151,7 +138,6 @@ public class DecompositionModel {
 		List<Integer>glassRoute= ExactSmall.getOptimalRoute();
 		int distanceGlass=ExactSmall.getOptimalTime();
 		
-
 		boolean visitPlasticFacility= (scheduleModel.goToPlasticRecycling().get(0)==1);
 		boolean visitGlassFacility= (scheduleModel.goToGlassRecycling().get(0)==1);
 		//Execute schedule
@@ -176,12 +162,9 @@ public class DecompositionModel {
 		}
 		System.out.println("");
 
-		// Execute schedule
 		// TODO: don't forget to also update t tilde and z
 		// t tilde = -1 als we 'm daadwerkelijk legen
 
-		
-		
 	}
 	
 	/** In this method we determine for each day in the rolling horizon how much garbage is expected to be present
