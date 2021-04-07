@@ -79,7 +79,8 @@ public class CplexModelSchedule {
 		schedulingConstraints();
 		timeConstraint();
 		addObjective();
-		//cplex.exportModel("schedule.lp");	
+		//cplex.exportModel("schedule.lp");
+		//cplex.setOut(null);
 	}
 
 	public void addVariables() throws IloException {
@@ -170,8 +171,8 @@ public class CplexModelSchedule {
 				}
 			}
 		}
-		cplex.exportModel("schedule.lp");
-		cplex.setOut(null);
+		//cplex.exportModel("schedule.lp");
+		
 	}
 
 	public void initModel2(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority) throws IloException {
