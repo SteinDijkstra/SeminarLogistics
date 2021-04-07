@@ -29,7 +29,16 @@ public class ExactSmall {
 		System.out.println("Optimal route: " + getOptimalRoute() + " with time: " + getOptimalTime());
 	}
 
-
+	public static void solve(boolean isPlastic,List<Integer>toVisit) {
+		List<Location> locations= new ArrayList<>();
+		for(Integer locNumber:toVisit) {
+			locations.add(model.getLocation(locNumber));
+		}
+		solve(locations, isPlastic);
+		
+	}
+	
+	
 	/** This method solves the model exactly, given the list of locations that must be visited
 	 * @param toVisit a list of locations of which we will form a route
 	 * @param isPlastic boolean plastic or not; necessary for picking right containers on location.

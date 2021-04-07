@@ -28,6 +28,9 @@ public class CplexModelSchedule {
 	private List<List<Integer>> possibleRoutes;
 	private List<Integer>glassDistances;
 	private List<Integer>plasticDistances;
+
+	
+
 	private int timeHorizon;
 	private int maxDeviationTime;
 	private int numberOfRoutes;
@@ -39,11 +42,13 @@ public class CplexModelSchedule {
 
 //	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
 //		CplexModelSchedule model = new CplexModelSchedule(Utils.init(),"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",1,1);
+
 //		double [][] garbagePlastic = new double[208][2];
 //		garbagePlastic[1][1]=1.5;
 //		double [][] garbageGlass = new double[208][2];
 //		garbageGlass[1][1]=1.0;
 //		int [][] plasticPriority = new int[208][2];
+
 //		plasticPriority[1][1]=1;
 //		int [][] glassPriority = new int[208][2];
 //		glassPriority[1][1]=1;
@@ -74,7 +79,8 @@ public class CplexModelSchedule {
 		schedulingConstraints();
 		timeConstraint();
 		addObjective();
-		//cplex.exportModel("schedule.lp");	
+		//cplex.exportModel("schedule.lp");
+		cplex.setOut(null);
 	}
 
 	public void addVariables() throws IloException {
@@ -99,8 +105,10 @@ public class CplexModelSchedule {
 			xGlass[r][0] = cplex.boolVar("xg"+r+","+0);
 			gPlastic[r][0] = cplex.numVar(0, capacityTruck,"gp" + r + "," + 0);
 			gGlass[r][0] = cplex.numVar(0, capacityTruck,"gg" + r + ","+ 0);
+
 		}
 		for(int i = 1; i < nodes; i++) {
+
 			priorityPlastic[i][0]=cplex.boolVar("pp" + i + "," + 0);
 			priorityGlass[i][0]=cplex.boolVar("pg" + i + "," + 0);
 		}
@@ -116,9 +124,11 @@ public class CplexModelSchedule {
 				gPlastic[r][t] = cplex.numVar(0, capacityTruck,"gp" + r + "," + t);
 				gGlass[r][t] = cplex.numVar(0, capacityTruck,"gg" + r + ","+ t );
 			}
+
 			for(int i = 1; i < nodes; i++) {
 				priorityPlastic[i][t] = cplex.boolVar("pp" + i + "," + t);
 				priorityGlass[i][t] = cplex.boolVar("pg" + i + "," + t);
+
 			}
 		}
 	}
@@ -141,8 +151,10 @@ public class CplexModelSchedule {
 				gGlass[r][t].setUB(garbageGlass[r][t]);
 			}
 		}
+
 		for(int t = 1; t <= timeHorizon; t++) {
 			for(int i = 1; i < nodes; i++) {
+
 				if(plasticPriority[i][t]==0) {	
 					priorityPlastic[i][t].setLB(0);
 					priorityPlastic[i][t].setUB(1);
@@ -159,12 +171,13 @@ public class CplexModelSchedule {
 				}
 			}
 		}
-		cplex.exportModel("schedule.lp");
+		//cplex.exportModel("schedule.lp");
+		
 	}
 
 	public void initModel2(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority) throws IloException {
-		int[]lastXPlastic = new int[209];
-		int[]lastXGlass = new int[209];
+		int[]lastXPlastic = new int[garbagePlastic.length];
+		int[]lastXGlass = new int[garbagePlastic.length];
 		initModel(initCapPlastic, initCapGlass,garbagePlastic,garbageGlass, plasticPriority,glassPriority,lastXPlastic,lastXGlass);
 		
 	}
@@ -217,11 +230,13 @@ public class CplexModelSchedule {
 				sump = cplex.sum(sump, cplex.prod(gPlastic[r][t-1], xPlastic[r][t-1]));
 				sumg = cplex.sum(sumg, cplex.prod(gGlass[r][t-1], xGlass[r][t-1]));
 			}
+
 			sump = cplex.sum(sump, cplex.prod(-capacityTruck, etaPlastic[t]));
 			sumg = cplex.sum(sumg, cplex.prod(-capacityTruck, etaGlass[t]));
 			cplex.addGe(cPlastic[t], sump);
 			cplex.addGe(cGlass[t], sumg);
 		}	
+
 		
 		for(int t = 1; t <= timeHorizon; t++) {
 			IloNumExpr sumh = cplex.constant(0);
@@ -305,4 +320,30 @@ public class CplexModelSchedule {
 		}
 		return result;
 	}
+
+	
+	public List<Integer> goToPlasticRecycling() throws UnknownObjectException, IloException{
+		List<Integer> result= new ArrayList<>();
+		for(int t=1;t<=timeHorizon;t++) {
+			if(cplex.getValue(etaPlastic[t])>0.5) {
+				result.add(1);
+			} else {
+				result.add(0);
+			}
+		}
+		return result;
+	}
+	public List<Integer> goToGlassRecycling() throws UnknownObjectException, IloException{
+		List<Integer> result= new ArrayList<>();
+		for(int t=1;t<=timeHorizon;t++) {
+			if(cplex.getValue(etaGlass[t])>0.5) {
+				result.add(1);
+			} else {
+				result.add(0);
+			}
+		}
+		return result;
+	}
+
 }
+

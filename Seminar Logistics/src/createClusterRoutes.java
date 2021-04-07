@@ -6,15 +6,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class createClusterRoutes {
 	//private static final int maxDistanceRoute=420;
 	public static void main(String[] args) throws IOException {
 
 		Graph model= Utils.init();
-		List<List<Integer>>route=createSubsets(readClusters("clusters.csv"),6);
-		writeRoutes(route,model,"cluster6");
+		List<List<Integer>>route=createSubsets(readClusters("cluster10.csv"),3);
+		writeRoutes(route,model,"cluster10.3");
+		//List<List<Integer>>routes=Utils.readRoutes("allRoutescluster10.4.csv");
+//		Set<Integer>test= new HashSet<>();
+//		for(List<Integer>route:routes) {
+//			for(Integer loc:route) {
+//				if(!test.contains(loc)) {
+//					test.add(loc);
+//				} else {
+//					System.out.print("loc double is: "+loc);
+//				}
+//			}
+//		}
 		
 		
 	}
@@ -68,10 +82,16 @@ public class createClusterRoutes {
 		try(BufferedWriter br=new BufferedWriter(new FileWriter(new File(filename)))){
 			br.write(""+data.size());
 			br.newLine();
+			int j=0;
 			for(List<Integer>list:data) {
+				j++;
+				if(list.size()==0) {
+					System.out.println("error");
+				}
 				br.write(""+list.get(0));
+
 				for(int i=1;i<list.size();i++) {
-					br.write(""+list.get(i)+";");
+					br.write(";"+list.get(i));
 				}
 				br.newLine();
 			}
@@ -91,24 +111,24 @@ public class createClusterRoutes {
 		List<List<Integer>>  subSets = new ArrayList<List<Integer>>();
 
 		for(int i=0; i<clusters.size(); i++) {
-				subSets.addAll(CreatePermutations(null, clusters.get(i), null,maxCardinality));
+			System.out.println("cluster: "+i);
+				subSets.addAll(CreatePermutations(new ArrayList<Integer>(), clusters.get(i), new ArrayList<List<Integer>>(), maxCardinality));
 		}
 		return subSets;
 	}
 
-	public static List<List<Integer>> CreatePermutations(List<Integer> fixed, List<Integer> nonFixed, List<List<Integer>> resultsList,int maxCardinality) {
-
+	public static List<List<Integer>> CreatePermutations(List<Integer> fixed, List<Integer> nonFixed, List<List<Integer>> resultsList, int maxCardinality) {
+		System.out.print(".");
 		//Checking whether there are no more elements to choose from, since there is only one or none.
-		if(fixed.size() == maxCardinality) {
+		if((fixed.size() <= maxCardinality && nonFixed.isEmpty()) ||(fixed.size() == maxCardinality)) {
 			//Creating the permutation
 			
 			//Adding the permutation to the list with permutations
-			if(resultsList == null) {
-				List<List<Integer>> resultsList2 = new ArrayList<>();
-				resultsList2.add(fixed);
-				resultsList = resultsList2;
-			} else {
-				resultsList.add(fixed);
+			Collections.sort(fixed);
+			if(!resultsList.contains(fixed)) {
+				if(fixed.size()>0) {
+					resultsList.add(fixed);
+				}
 			}	
 
 
@@ -138,8 +158,9 @@ public class createClusterRoutes {
 				}
 
 				//Choosing the next element
-				resultsList = CreatePermutations(newFixed, newNonFixed, resultsList,maxCardinality);
+				resultsList = CreatePermutations(newFixed, newNonFixed, resultsList, maxCardinality);
 				nonFixed.remove(0);
+				resultsList = CreatePermutations(fixed, nonFixed, resultsList, maxCardinality);	
 			}
 
 		}
