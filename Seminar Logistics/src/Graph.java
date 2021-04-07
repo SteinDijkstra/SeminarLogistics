@@ -174,6 +174,24 @@ public class Graph {
 			glass.setPredictedAmountGarbage(amountGlass);
 		}
 	}
+	
+	public void initGarbageUsingT(List<Integer>lastEmptiedPlasticTime,List<Integer>lastEmptiedGlassTime){
+		for(int i=0;i<locations.size();i++) {
+			Location loc=locations.get(i);
+			
+			Container plastic= loc.getPlasticContainer();
+			double predictedPlastic=-lastEmptiedPlasticTime.get(i)*plastic.getMeanGarbageDisposed();
+			double actualPlastic=predictedPlastic+Math.sqrt(-lastEmptiedPlasticTime.get(i))*plastic.getStdGarbageDisposed();
+			plastic.setActualAmountGarbage(actualPlastic);
+			plastic.setPredictedAmountGarbage(predictedPlastic);
+			
+			Container glass= loc.getGlassContainer();
+			double predictedGlass=-lastEmptiedGlassTime.get(i)*glass.getMeanGarbageDisposed();
+			double actualGlass=predictedGlass+Math.sqrt(-lastEmptiedGlassTime.get(i))*glass.getStdGarbageDisposed();
+			glass.setActualAmountGarbage(actualGlass);
+			glass.setPredictedAmountGarbage(predictedGlass);
+		}
+	}
 
 	/**
 	 * update the garbage at the end of the day 
