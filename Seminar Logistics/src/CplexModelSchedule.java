@@ -38,7 +38,7 @@ public class CplexModelSchedule {
 	private double capacityTruck = 75;
 	private double recyclingPlastic = 113;
 	private double recyclingGlass = 261;
-	private double maxTimeUsage = 440;
+	private double maxTimeUsage = 480;
 
 //	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
 //		CplexModelSchedule model = new CplexModelSchedule(Utils.init(),"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",1,1);
@@ -79,7 +79,8 @@ public class CplexModelSchedule {
 		schedulingConstraints();
 		timeConstraint();
 		addObjective();
-		//cplex.exportModel("schedule.lp");	
+		//cplex.exportModel("schedule.lp");
+		cplex.setOut(null);
 	}
 
 	public void addVariables() throws IloException {
@@ -170,8 +171,8 @@ public class CplexModelSchedule {
 				}
 			}
 		}
-		cplex.exportModel("schedule.lp");
-		cplex.setOut(null);
+		//cplex.exportModel("schedule.lp");
+		
 	}
 
 	public void initModel2(double initCapPlastic, double initCapGlass, double[][]garbagePlastic,double[][]garbageGlass, int[][]plasticPriority, int[][] glassPriority) throws IloException {
