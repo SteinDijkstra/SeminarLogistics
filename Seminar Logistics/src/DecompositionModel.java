@@ -9,7 +9,7 @@ import ilog.concert.IloException;
 public class DecompositionModel {
 	private CplexModelSchedule scheduleModel;
 	private Graph graph;
-	private final double ZVALUE =1.28;//= 1.645;
+	private final double ZVALUE =1.645;//= 1.645;
 	private final double ALPHA = 1; // Please do not change without thinking very deeply (and asking Marja or Manuela)
 	private List<List<Integer>> possibleRoutes;
 	private List<Double> averagePDays;
@@ -24,11 +24,13 @@ public class DecompositionModel {
 	private int currentCapPlastic; //ct0
 	private int currentCapGlass;
 	private boolean hasPlasticContainer;
-	private final static int TOTALRUNNINGDAYS=30;
+	private final static int TOTALRUNNINGDAYS=20;
 	private final static int MAXCAPACITYCONTAINER=75;
 	private final static int RECYCLINGPLASTIC = 113;
-	private  final static int RECYCLINGGLASS = 261;
+	private final static int RECYCLINGGLASS = 261;
 	private final static int STARTDAY=2;
+	private final static int TIMEHORIZON = 3;
+	private final static int MAXTIMEDEV = 3;
 	private int runningTime;
 	private int day;
 	//Statistics:
@@ -39,8 +41,9 @@ public class DecompositionModel {
 		//model.init();
 		//model.scheduleDay();
 		Graph graph= Utils.init();
-		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv","daysbeforeempty_plastic.csv","daysbeforeempty_glass.csv",6, 4);
+		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv","daysbeforeempty_plastic.csv","daysbeforeempty_glass.csv", TIMEHORIZON, MAXTIMEDEV);
 		model2.run();
+		System.out.println(model2.runningTime);
 		//model2.init();
 		//model2.scheduleDay();
 	}
@@ -209,34 +212,43 @@ public class DecompositionModel {
 	}
 
 	public int[][] determinePriority(boolean isPlastic){
-
+		
 		int[][]result = new int[graph.getLocations().size()][timeHorizon+1];
 		for(int i = 1; i < graph.getLocations().size(); i++) {
 			// This boolean makes sure we only empty a container once in the sliding time window!
 			boolean isPriorityPlastic = false;
 			boolean isPriorityGlass = false;
 			Location loc = graph.getLocation(i);
-			for(int t = 0; t <= timeHorizon; t++) {//TODO check of het klopt
-
+			
+			for(int t = 0; t <= timeHorizon; t++) {
 				if(isPlastic && !isPriorityPlastic) {
-
+					int tTilde = lastEmptiedPlasticTime.get(i);
+					int weekends = (t - tTilde) / 5; // Floor function not necessary in int value
+					double extraDays = (t - tTilde) % 5;
+					if(this.day - extraDays <= 0.0) {
+						weekends++;
+					}
 					Container cont = loc.getPlasticContainer();
-					double value = cont.getMeanGarbageDisposed() * (t - lastEmptiedPlasticTime.get(i)) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t-lastEmptiedPlasticTime.get(i)) + lastEmptiedPlasticAmount.get(i);
+					double value = cont.getMeanGarbageDisposed() * (t - tTilde + 2*weekends) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t - tTilde + 2*weekends) + lastEmptiedPlasticAmount.get(i);
 					if(value > cont.getCapacity()*ALPHA) {
 						isPriorityPlastic = true;
 						if(t==0) {
-							// TODO Check if we do a route on day 0
 							result[i][1] = 1;
 						}
 						else {
 							result[i][t] = 1;
 						}
 					}
-
 				} 
 				else if (!isPlastic && !isPriorityGlass){
+					int tTilde = lastEmptiedGlassTime.get(i);
+					int weekends = (t - tTilde) / 5;
+					double extraDays = (t - tTilde) % 5;
+					if(this.day - extraDays <= 0) {
+						weekends++;
+					}
 					Container cont = loc.getGlassContainer();
-					double value = cont.getMeanGarbageDisposed() * (t - lastEmptiedGlassTime.get(i)) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t-lastEmptiedGlassTime.get(i)) + lastEmptiedGlassAmount.get(i);
+					double value = cont.getMeanGarbageDisposed() * (t - tTilde + 2*weekends) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t - tTilde + 2*weekends) + lastEmptiedGlassAmount.get(i);
 					if(value > cont.getCapacity()*ALPHA) {
 						isPriorityGlass = true;
 						if(t==0) {
@@ -248,12 +260,6 @@ public class DecompositionModel {
 						}
 					}
 				}
-			}
-			if(isPlastic) {
-				lastEmptiedPlasticTime.set(i, lastEmptiedPlasticTime.get(i)-1);
-			}
-			else {
-				lastEmptiedGlassTime.set(i, lastEmptiedGlassTime.get(i)-1);
 			}
 		}
 		return result;
