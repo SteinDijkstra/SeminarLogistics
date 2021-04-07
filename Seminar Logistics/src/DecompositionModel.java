@@ -28,8 +28,8 @@ public class DecompositionModel {
 	private final static int MAXCAPACITYCONTAINER=75;
 	private final static int RECYCLINGPLASTIC = 113;
 	private final static int RECYCLINGGLASS = 261;
-	private final static int STARTDAY=2;
-	private final static int TIMEHORIZON = 3;
+	private final static int STARTDAY=2; // 
+	private final static int TIMEHORIZON = 4;
 	private final static int MAXTIMEDEV = 3;
 	private int runningTime;
 	private int day;
@@ -50,7 +50,7 @@ public class DecompositionModel {
 	
 	public void run() throws IloException {
 		init();
-		for(day=STARTDAY;day<STARTDAY+TOTALRUNNINGDAYS;day++) {
+		for(day=STARTDAY; day<STARTDAY+TOTALRUNNINGDAYS; day++) {
 			if((day-1)%5==0) {
 				graph.updateGarbage();
 				graph.updateGarbage();
@@ -230,7 +230,7 @@ public class DecompositionModel {
 						dayTTilde = dayTTilde + 5;
 					}
 					if(dayT < dayTTilde) {
-						
+						weekends++;
 					}
 					Container cont = loc.getPlasticContainer();
 					double value = cont.getMeanGarbageDisposed() * (t - tTilde + 2*weekends) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t - tTilde + 2*weekends) + lastEmptiedPlasticAmount.get(i);
@@ -246,9 +246,13 @@ public class DecompositionModel {
 				} 
 				else if (!isPlastic && !isPriorityGlass){
 					int tTilde = lastEmptiedGlassTime.get(i);
-					int weekends = (t - tTilde) / 5;
-					double extraDays = (t - tTilde) % 5;
-					if(this.day - extraDays <= 0) {
+					int weekends = (t - tTilde) / 5; // Floor function not necessary in int value
+					int dayT = (this.day+t-1)%5;
+					int dayTTilde = (this.day+tTilde-1)%5;
+					if(dayTTilde < 0) {
+						dayTTilde = dayTTilde + 5;
+					}
+					if(dayT < dayTTilde) {
 						weekends++;
 					}
 					Container cont = loc.getGlassContainer();
