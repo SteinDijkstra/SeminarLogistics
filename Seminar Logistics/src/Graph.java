@@ -136,7 +136,7 @@ public class Graph {
 		}
 		return sum;
 	}
-
+	
 	/**
 	 * Initializes the garbage bins
 	 */

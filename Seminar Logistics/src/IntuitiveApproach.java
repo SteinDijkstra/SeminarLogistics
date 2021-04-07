@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class IntuitiveApproach {
 	private final static double ALPHA = 0.9;
-	private final static double BETA = 0.9;
+	private final static double BETA = 1;
 	private final static int DELTA = 10;
 	private final static int ETA = 10; // glass parameter
 	private final static int THETA = 10;
@@ -33,7 +33,7 @@ public class IntuitiveApproach {
 		graph = Utils.init("updated2_travel_time_matrix.csv", "Deposit_data.csv");
 		ExactSmall.setModel(graph);
 		nodes = graph.getLocations().size();
-		timeHorizon = 260;
+		timeHorizon = 10;
 		//gamma = 0;
 		plasticCubesToVisit = new ArrayList<ArrayList<Location>>();
 		glassCubesToVisit = new ArrayList<ArrayList<Location>>();
