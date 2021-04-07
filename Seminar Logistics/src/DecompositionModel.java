@@ -9,7 +9,7 @@ import ilog.concert.IloException;
 public class DecompositionModel {
 	private CplexModelSchedule scheduleModel;
 	private Graph graph;
-	private final double ZVALUE =1.28;//= 1.645;
+	private final double ZVALUE =1.645;//= 1.645; //Th
 	private final double ALPHA = 1; // Please do not change without thinking very deeply (and asking Marja or Manuela)
 	private List<List<Integer>> possibleRoutes;
 	private List<Double> averagePDays;
@@ -24,14 +24,14 @@ public class DecompositionModel {
 	private int currentCapPlastic; //ct0
 	private int currentCapGlass;
 	private boolean hasPlasticContainer;
-	private final static int TOTALRUNNINGDAYS=30;
+	private final static int TOTALRUNNINGDAYS=100;
 	private final static int MAXCAPACITYCONTAINER=75;
 	private final static int RECYCLINGPLASTIC = 113;
 	private  final static int RECYCLINGGLASS = 261;
 	private final static int STARTDAY=2;
-	private int runningTime;
 	private int day;
 	//Statistics:
+	private int runningTime;
 	
 	
 	public static void main(String[] args) throws NumberFormatException, IOException, IloException {
@@ -39,8 +39,9 @@ public class DecompositionModel {
 		//model.init();
 		//model.scheduleDay();
 		Graph graph= Utils.init();
-		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv","daysbeforeempty_plastic.csv","daysbeforeempty_glass.csv",6, 4);
+		DecompositionModel model2= new DecompositionModel(graph, "allRoutescluster10.3.csv", "allDistancesPlasticcluster10.3.csv","allDistancesGlasscluster10.3.csv","daysbeforeempty_plastic.csv","daysbeforeempty_glass.csv",3, 3);
 		model2.run();
+		System.out.print(model2.runningTime);
 		//model2.init();
 		//model2.scheduleDay();
 	}
@@ -49,8 +50,8 @@ public class DecompositionModel {
 		init();
 		for(day=STARTDAY;day<STARTDAY+TOTALRUNNINGDAYS;day++) {
 			if((day-1)%5==0) {
-				graph.updateGarbage();
-				graph.updateGarbage();
+				//graph.updateGarbage();
+				//graph.updateGarbage();
 			} 
 			graph.updateGarbage();
 			scheduleDay();
@@ -82,7 +83,7 @@ public class DecompositionModel {
 	}
 	
 	public void init() {
-		currentCapPlastic=40;
+		currentCapPlastic=20;
 		runningTime=0;
 		currentCapGlass=0;
 		//graph.initGarbageMean();
@@ -199,7 +200,7 @@ public class DecompositionModel {
 			for(int t = 0; t <= timeHorizon; t++) {
 				// We forecast the amount for every point in time by adding the mean t times to the current predicted amount.
 				if((day+t-1)%5==0) {//take note of the weekend
-					mondays++;
+					//mondays++;
 				}
 				result[r][t] = currentAmount + t*totalExtraPerDay+2*mondays*totalExtraPerDay;
 			}
@@ -249,12 +250,12 @@ public class DecompositionModel {
 					}
 				}
 			}
-			if(isPlastic) {
-				lastEmptiedPlasticTime.set(i, lastEmptiedPlasticTime.get(i)-1);
-			}
-			else {
-				lastEmptiedGlassTime.set(i, lastEmptiedGlassTime.get(i)-1);
-			}
+//			if(isPlastic) {
+//				lastEmptiedPlasticTime.set(i, lastEmptiedPlasticTime.get(i)-1);
+//			}
+//			else {
+//				lastEmptiedGlassTime.set(i, lastEmptiedGlassTime.get(i)-1);
+//			}
 		}
 		return result;
 	}
