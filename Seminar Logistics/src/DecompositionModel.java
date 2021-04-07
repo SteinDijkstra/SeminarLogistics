@@ -224,9 +224,13 @@ public class DecompositionModel {
 				if(isPlastic && !isPriorityPlastic) {
 					int tTilde = lastEmptiedPlasticTime.get(i);
 					int weekends = (t - tTilde) / 5; // Floor function not necessary in int value
-					double extraDays = (t - tTilde) % 5;
-					if(this.day - extraDays <= 0.0) {
-						weekends++;
+					int dayT = (this.day+t-1)%5;
+					int dayTTilde = (this.day+tTilde-1)%5;
+					if(dayTTilde < 0) {
+						dayTTilde = dayTTilde + 5;
+					}
+					if(dayT < dayTTilde) {
+						
 					}
 					Container cont = loc.getPlasticContainer();
 					double value = cont.getMeanGarbageDisposed() * (t - tTilde + 2*weekends) + ZVALUE *cont.getStdGarbageDisposed() * Math.sqrt(t - tTilde + 2*weekends) + lastEmptiedPlasticAmount.get(i);
