@@ -38,7 +38,7 @@ public class CplexModelSchedule {
 	private double capacityTruck = 75;
 	private double recyclingPlastic = 113;
 	private double recyclingGlass = 261;
-	private double maxTimeUsage = 480;
+	private double maxTimeUsage = 440;
 
 //	public static void main(String[] args) throws NumberFormatException, IloException, IOException {
 //		CplexModelSchedule model = new CplexModelSchedule(Utils.init(),"allRoutesBasic.csv","allDistancesGlassBasic.csv","allDistancesGlassBasic.csv",1,1);

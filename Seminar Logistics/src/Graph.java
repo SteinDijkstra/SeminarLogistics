@@ -137,6 +137,7 @@ public class Graph {
 		return sum;
 	}
 	
+	
 	/**
 	 * Initializes the garbage bins
 	 */
@@ -175,19 +176,41 @@ public class Graph {
 		}
 	}
 	
-	public void initGarbageUsingT(List<Integer>lastEmptiedPlasticTime,List<Integer>lastEmptiedGlassTime){
+	public void initGarbageUsingT(List<Integer>lastEmptiedPlasticTime,List<Integer>lastEmptiedGlassTime,int startDay){
 		for(int i=0;i<locations.size();i++) {
 			Location loc=locations.get(i);
 			
+			int tTilde = lastEmptiedPlasticTime.get(i);
+			int weekends = (- tTilde) / 5; // Floor function not necessary in int value
+			int dayT = (startDay-1)%5;
+			int dayTTilde = (startDay+tTilde-1)%5;
+			if(dayTTilde < 0) {
+				dayTTilde = dayTTilde + 5;
+			}
+			if(dayT < dayTTilde) {
+				weekends++;
+			}
+			
 			Container plastic= loc.getPlasticContainer();
-			double predictedPlastic=-lastEmptiedPlasticTime.get(i)*plastic.getMeanGarbageDisposed();
-			double actualPlastic=predictedPlastic+Math.sqrt(-lastEmptiedPlasticTime.get(i))*plastic.getStdGarbageDisposed();
+			double predictedPlastic=plastic.getMeanGarbageDisposed() * ( - tTilde + 2*weekends);
+			double actualPlastic=plastic.getMeanGarbageDisposed() * ( - tTilde + 2*weekends) + random.nextGaussian() *plastic.getStdGarbageDisposed() * Math.sqrt( - tTilde + 2*weekends);
 			plastic.setActualAmountGarbage(actualPlastic);
 			plastic.setPredictedAmountGarbage(predictedPlastic);
 			
+			tTilde = lastEmptiedGlassTime.get(i);
+			weekends = (- tTilde) / 5; // Floor function not necessary in int value
+			dayT = (startDay-1)%5;
+			dayTTilde = (startDay+tTilde-1)%5;
+			if(dayTTilde < 0) {
+				dayTTilde = dayTTilde + 5;
+			}
+			if(dayT < dayTTilde) {
+				weekends++;
+			}
+			
 			Container glass= loc.getGlassContainer();
-			double predictedGlass=-lastEmptiedGlassTime.get(i)*glass.getMeanGarbageDisposed();
-			double actualGlass=predictedGlass+Math.sqrt(-lastEmptiedGlassTime.get(i))*glass.getStdGarbageDisposed();
+			double predictedGlass=glass.getMeanGarbageDisposed() * ( - tTilde + 2*weekends);
+			double actualGlass=glass.getMeanGarbageDisposed() * ( - tTilde + 2*weekends) + random.nextGaussian() *glass.getStdGarbageDisposed() * Math.sqrt( - tTilde + 2*weekends);
 			glass.setActualAmountGarbage(actualGlass);
 			glass.setPredictedAmountGarbage(predictedGlass);
 		}
