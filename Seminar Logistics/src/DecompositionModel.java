@@ -8,9 +8,10 @@ import ilog.concert.IloException;
  */
 public class DecompositionModel {
 	private CplexModelSchedule scheduleModel;
+	private ExactSmallDynamicProgramming routeModel;
 	private Graph graph;
 
-	private final double ZVALUE =1.645;//= 1.645; //Th
+	private final double ZVALUE = 1.645;//= 1.645; //Th
 	private final double ALPHA = 1; // Please do not change without thinking very deeply (and asking Marja or Manuela)
 	private List<List<Integer>> possibleRoutes;
 	private List<Double> averagePDays;
@@ -25,13 +26,16 @@ public class DecompositionModel {
 	private int currentCapPlastic; //ct0
 	private int currentCapGlass;
 	private boolean hasPlasticContainer;
-	private final static int TOTALRUNNINGDAYS=51;
+	private final static int TOTALRUNNINGDAYS=5;
 	private final static int MAXCAPACITYCONTAINER=75;
 	private final static int RECYCLINGPLASTIC = 113;
 	private final static int RECYCLINGGLASS = 261;
 	private final static int STARTDAY=2;
 	private final static int TIMEHORIZON = 3;
-	private final static int MAXTIMEDEV = 2;
+	private final static int MAXTIMEDEV = 3;
+	private final static int INITIALPLASTIC=20;
+	private final static int INITIALGLASS=0;
+	private final static int SEED=8;
 	private int day;
 	//Statistics:
 	private int runningTime;
@@ -84,7 +88,7 @@ public class DecompositionModel {
 		this.averagePDays = Utils.readAverageDays(avgPDaysFileName);
 		this.averageGDays = Utils.readAverageDays(avgGDaysFileName);
 		scheduleModel = new CplexModelSchedule(instance, routeFileName, plasticDistanceFileName, glassDistanceFileName, timeHorizon, maxDeviationTime);
-		ExactSmall.setModel(instance);
+		routeModel = new ExactSmallDynamicProgramming(instance);
 		graph = instance;
 		possibleRoutes = Utils.readRoutes(routeFileName);
 		this.timeHorizon = timeHorizon;
@@ -102,14 +106,13 @@ public class DecompositionModel {
 	}
 	
 	public void init() {
-		graph.setSeed(8);
-		currentCapPlastic=20;
-		
-		currentCapGlass=0;
+		graph.setSeed(SEED);
+		currentCapPlastic=INITIALPLASTIC;
+		currentCapGlass=INITIALGLASS;
 		//graph.initGarbageMean();
 		hasPlasticContainer=true;
 		initLastEmptiedTime();
-		graph.initGarbageUsingT(lastEmptiedPlasticTime,lastEmptiedGlassTime);
+		graph.initGarbageUsingT(lastEmptiedPlasticTime,lastEmptiedGlassTime, STARTDAY);
 	}
 	
 	public void initStatistics() {
@@ -134,11 +137,18 @@ public class DecompositionModel {
 		System.out.println("RESULTS");
 		System.out.println("Running time: "+ runningTime+" average per day: "+runningTime/TOTALRUNNINGDAYS);
 		
+		int workingDayViolations=0;
 		System.out.print("Running time per day: ");
 		for(int num:runningTimePerDay) {
 			System.out.print(num+", ");
+			if(num>480) {
+				workingDayViolations++;
+			}
 		}
 		System.out.println("");
+		
+		System.out.println("working day violations: "+workingDayViolations);
+		
 		
 		System.out.print("Overflow per plastic location: ");
 		for(int num:numberOfPlasticOverflowPerLocation) {
@@ -149,6 +159,14 @@ public class DecompositionModel {
 		System.out.print("Overflow per glass Location: ");
 		for(int num:numberOfGlassOverflowPerLocation) {
 			System.out.print(num+", ");
+		}
+		System.out.println("");
+		
+		System.out.print("Locations with more than 1 overflow: ");
+		for(int i=1;i<graph.getLocations().size();i++) {
+			if(numberOfPlasticOverflowPerLocation[i]+numberOfGlassOverflowPerLocation[i]>1) {
+				System.out.print("Loc "+i+" plastic "+numberOfPlasticOverflowPerLocation[i]+" glass "+numberOfGlassOverflowPerLocation[i]+", ");
+			}
 		}
 		System.out.println("");
 		
@@ -267,12 +285,12 @@ public class DecompositionModel {
 		//System.out.println(scheduleModel.goToPlasticRecycling());
 		
 		//Route schedule
-		ExactSmall.solve(true,scheduleModel.plasticLocToVisit(1));
-		List<Integer> plasticRoute = ExactSmall.getOptimalRoute();
-		int distancePlastic=ExactSmall.getOptimalTime();
-		ExactSmall.solve(false,scheduleModel.glassLocToVisit(1));
-		List<Integer>glassRoute= ExactSmall.getOptimalRoute();
-		int distanceGlass=ExactSmall.getOptimalTime();
+		routeModel.solve(scheduleModel.plasticLocToVisit(1),true);
+		List<Integer> plasticRoute = routeModel.getTour();
+		int distancePlastic=routeModel.getTourCost();
+		routeModel.solve(scheduleModel.glassLocToVisit(1),false);
+		List<Integer>glassRoute= routeModel.getTour();
+		int distanceGlass=routeModel.getTourCost();
 		
 		boolean visitPlasticFacility= (scheduleModel.goToPlasticRecycling().get(0)==1);
 		boolean visitGlassFacility= (scheduleModel.goToGlassRecycling().get(0)==1);
@@ -382,6 +400,16 @@ public class DecompositionModel {
 	public void executeRoute(List<Integer>plasticRoute, List<Integer>glassRoute, boolean toPlasticFacility, boolean toGlassFacility, int distPlastic, int distGlass) {
 		//Init statistic
 		int runTimeStartOfDay=runningTime;
+		//Check overflow
+		for(int i=1;i<graph.getLocations().size();i++) {
+			Location loc=graph.getLocation(i);
+			if(loc.getActualPlastic()>loc.getPlasticContainer().getCapacity()) {
+				numberOfPlasticOverflowPerLocation[i]++;
+			}
+			if(loc.getActualGlass()>loc.getGlassContainer().getCapacity()) {
+				numberOfGlassOverflowPerLocation[i]++;
+			}
+		}
 
 		//Execute recycling
 		if(toPlasticFacility) {
@@ -400,6 +428,11 @@ public class DecompositionModel {
 		}
 		//Execute Route
 		for(Integer locNumber:plasticRoute) {
+			
+//			Container test=graph.getLocation(locNumber).getPlasticContainer();
+//			System.out.println(test);
+//			System.out.println(lastEmptiedPlasticTime.get(locNumber));
+//			System.out.println(test.getMeanGarbageDisposed()+" "+test.getStdGarbageDisposed());
 			currentCapPlastic+=graph.getLocation(locNumber).emptyPlastic(MAXCAPACITYCONTAINER-currentCapPlastic);
 			//update t:
 			lastEmptiedPlasticTime.set(locNumber, 0);
@@ -411,6 +444,7 @@ public class DecompositionModel {
 			
 		}
 		for(Integer locNumber:glassRoute) {
+//			System.out.println(graph.getLocation(locNumber).getGlassContainer());
 			currentCapGlass+=graph.getLocation(locNumber).emptyGlass(MAXCAPACITYCONTAINER-currentCapGlass);
 			//update t:
 			lastEmptiedGlassTime.set(locNumber, 0);
@@ -446,15 +480,7 @@ public class DecompositionModel {
 		
 		//Save Statistics:
 		runningTimePerDay[day-STARTDAY]=runningTime-runTimeStartOfDay;
-		for(int i=1;i<graph.getLocations().size();i++) {
-			Location loc=graph.getLocation(i);
-			if(loc.getActualPlastic()>loc.getPlasticContainer().getCapacity()) {
-				numberOfPlasticOverflowPerLocation[i]++;
-			}
-			if(loc.getActualGlass()>loc.getGlassContainer().getCapacity()) {
-				numberOfGlassOverflowPerLocation[i]++;
-			}
-		}
+		
 		amountPlasticContainer[day-STARTDAY]=currentCapPlastic;
 		amountGlassContainer[day-STARTDAY]=currentCapGlass;
 		
