@@ -21,10 +21,15 @@ public class ExactSmall {
 		model.updateGarbage();
 
 		// First check which containers should be visited today.
-		List<Location> toVisit = model.getLocWithContainerOverBound(1, true);
+		//List<Location> toVisit = model.getLocWithContainerOverBound(1, true);
 		// TODO: check hoeveel containers dit zijn, voordat we verder gaan.
-		System.out.println("find optimal route through: "+ toVisit);
-		solve(toVisit, true);
+		//System.out.println("find optimal route through: "+ toVisit);
+		List<Integer> toVisit= new ArrayList<>();
+		toVisit.add(1);toVisit.add(5);toVisit.add(7);
+		toVisit.add(112);toVisit.add(64);toVisit.add(13);
+		toVisit.add(21);toVisit.add(200);toVisit.add(187);
+		//toVisit.add(71);toVisit.add(66);toVisit.add(153);
+		solve(false,toVisit);
 		// The other printed line can be outcommented in the findRoute method.
 		System.out.println("Optimal route: " + getOptimalRoute() + " with time: " + getOptimalTime());
 	}

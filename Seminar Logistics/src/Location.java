@@ -193,7 +193,7 @@ public class Location {
 			glassContainer.setPredictedAmountGarbage(glassContainer.getActualAmountGarbage());//TODO how accurate can this be estimated
 			return maxEmpty;
 		} else { //all garbaged can be collected
-			double amountEmptied = plasticContainer.getActualAmountGarbage();
+			double amountEmptied = glassContainer.getActualAmountGarbage();
 			glassContainer.setActualAmountGarbage(0);
 			glassContainer.setPredictedAmountGarbage(0);
 			return amountEmptied;
