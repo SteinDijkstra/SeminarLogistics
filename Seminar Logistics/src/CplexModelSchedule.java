@@ -80,7 +80,7 @@ public class CplexModelSchedule {
 		timeConstraint();
 		addObjective();
 		//cplex.exportModel("schedule.lp");
-		//cplex.setOut(null);
+		cplex.setOut(null);
 	}
 
 	public void addVariables() throws IloException {
