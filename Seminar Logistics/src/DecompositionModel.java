@@ -69,13 +69,9 @@ public class DecompositionModel {
 	
 	public void run() throws IloException {
 		init();
-<<<<<<< HEAD
-		for(day=STARTDAY; day<STARTDAY+TOTALRUNNINGDAYS; day++) {
-=======
 		initStatistics();
-		for(day=STARTDAY;day<STARTDAY+TOTALRUNNINGDAYS;day++) {
+		for(day=STARTDAY; day<STARTDAY+TOTALRUNNINGDAYS; day++) {
 			System.out.println("Running day "+(day-STARTDAY)+" actual day "+day%5);
->>>>>>> refs/remotes/origin/main
 			if((day-1)%5==0) {
 				graph.updateGarbage();
 				graph.updateGarbage();
