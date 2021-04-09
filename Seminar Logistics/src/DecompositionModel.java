@@ -26,15 +26,15 @@ public class DecompositionModel {
 	private int currentCapPlastic; //ct0
 	private int currentCapGlass;
 	private boolean hasPlasticContainer;
-	private final static int TOTALRUNNINGDAYS=5;
+	private final static int TOTALRUNNINGDAYS=3;
 	private final static int MAXCAPACITYCONTAINER=75;
 	private final static int RECYCLINGPLASTIC = 113;
 	private final static int RECYCLINGGLASS = 261;
 	private final static int STARTDAY=2;
-	private final static int TIMEHORIZON = 3;
-	private final static int MAXTIMEDEV = 3;
+	private final static int TIMEHORIZON = 5;
+	private final static int MAXTIMEDEV = 5;
 	private final static int INITIALPLASTIC=20;
-	private final static int INITIALGLASS=0;
+	private final static int INITIALGLASS=50;
 	private final static int SEED=8;
 	private int day;
 	//Statistics:
@@ -71,7 +71,9 @@ public class DecompositionModel {
 		init();
 		initStatistics();
 		for(day=STARTDAY;day<STARTDAY+TOTALRUNNINGDAYS;day++) {
-			System.out.println("Running day "+(day-STARTDAY)+" actual day "+day%5);
+			if(day!=STARTDAY) {
+				System.out.println("Running day "+(day-STARTDAY)+" run time prev day "+runningTimePerDay[day-STARTDAY-1]);
+			}
 			if((day-1)%5==0) {
 				graph.updateGarbage();
 				graph.updateGarbage();
@@ -149,26 +151,44 @@ public class DecompositionModel {
 		
 		System.out.println("working day violations: "+workingDayViolations);
 		
-		
+		int sumPlastic=0;
 		System.out.print("Overflow per plastic location: ");
 		for(int num:numberOfPlasticOverflowPerLocation) {
 			System.out.print(num+", ");
+			if(num>0) {
+				sumPlastic++;
+			}
 		}
 		System.out.println("");
 		
+		int sumGlass=0;
 		System.out.print("Overflow per glass Location: ");
 		for(int num:numberOfGlassOverflowPerLocation) {
 			System.out.print(num+", ");
+			if(num>0) {
+				sumGlass++;
+			}
 		}
 		System.out.println("");
 		
-		System.out.print("Locations with more than 1 overflow: ");
+		int sumPlasticAndGlass=0;
+		System.out.print("Locations with more than 2 overflow: ");
 		for(int i=1;i<graph.getLocations().size();i++) {
 			if(numberOfPlasticOverflowPerLocation[i]+numberOfGlassOverflowPerLocation[i]>1) {
+				sumPlasticAndGlass++;
+			}
+			if(numberOfPlasticOverflowPerLocation[i]+numberOfGlassOverflowPerLocation[i]>=2) {
 				System.out.print("Loc "+i+" plastic "+numberOfPlasticOverflowPerLocation[i]+" glass "+numberOfGlassOverflowPerLocation[i]+", ");
 			}
 		}
 		System.out.println("");
+		
+		System.out.println("number of locations with at least one plastic overflow: "+sumPlastic);
+		System.out.println("number of locations with at least one glass overflow: "+sumGlass);
+		System.out.println("number of locations with at least one  overflow: "+sumPlasticAndGlass);
+		
+		//aantal locaties plastic met 1 overflow
+		//a
 		
 		System.out.print("Locations with more than 5 overflow: ");
 		for(int i=1;i<graph.getLocations().size();i++) {
@@ -288,6 +308,7 @@ public class DecompositionModel {
 		routeModel.solve(scheduleModel.plasticLocToVisit(1),true);
 		List<Integer> plasticRoute = routeModel.getTour();
 		int distancePlastic=routeModel.getTourCost();
+		//System.out.print("time plasticRoute"+distancePlastic);
 		routeModel.solve(scheduleModel.glassLocToVisit(1),false);
 		List<Integer>glassRoute= routeModel.getTour();
 		int distanceGlass=routeModel.getTourCost();
@@ -413,6 +434,7 @@ public class DecompositionModel {
 
 		//Execute recycling
 		if(toPlasticFacility) {
+			System.out.println("toPlasticFac");
 			currentCapPlastic=0;
 			runningTime+=RECYCLINGPLASTIC;
 			numberOfTimesToPlasticRecycling++;
@@ -420,6 +442,7 @@ public class DecompositionModel {
 			
 		}
 		if(toGlassFacility) {
+			System.out.println("toGlassFac");
 			currentCapGlass=0;
 			runningTime+=RECYCLINGGLASS;
 			numberOfTimesToGlassRecycling++;
@@ -454,7 +477,7 @@ public class DecompositionModel {
 				glassContainerOverflow++;
 			}
 		}
-		runningTime+=distPlastic+distGlass;
+		runningTime+=(distPlastic+distGlass);
 		
 		//Determine number of swaps
 		//Swap 1:

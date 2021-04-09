@@ -28,14 +28,14 @@ public class ExactSmallDynamicProgramming {
 //	public static void main(String[] args) throws NumberFormatException, IOException {
 //		ExactSmallDynamicProgramming routeModel= new ExactSmallDynamicProgramming(Utils.init());
 //		List<Integer> toVisit= new ArrayList<>();
-//		toVisit.add(1);toVisit.add(5);toVisit.add(7);
-//		toVisit.add(112);toVisit.add(64);toVisit.add(13);
-//		toVisit.add(21);toVisit.add(200);toVisit.add(187);
-//		toVisit.add(22);toVisit.add(44);toVisit.add(33);
-//		toVisit.add(71);toVisit.add(66);toVisit.add(153);
+//		toVisit.add(153);toVisit.add(120);toVisit.add(117);
+//		//toVisit.add(112);toVisit.add(64);toVisit.add(13);
+//		//toVisit.add(21);toVisit.add(200);toVisit.add(187);
+//		//toVisit.add(22);toVisit.add(44);toVisit.add(33);
+//		//toVisit.add(71);toVisit.add(66);toVisit.add(153);
 //		//toVisit.add(91);toVisit.add(151);toVisit.add(203);
 //		//toVisit.add(206);toVisit.add(139);toVisit.add(172);
-//		routeModel.solve(toVisit,false);
+//		routeModel.solve(toVisit,true);
 //		System.out.println(routeModel.getTour());
 //		System.out.println(routeModel.getTourCost());
 //
@@ -43,6 +43,12 @@ public class ExactSmallDynamicProgramming {
 //	}
 
 	public void solve(List<Integer> locToVisit,boolean isPlastic) {
+		if(locToVisit.size()==0) {
+			minTourCost = 0;
+			tour=new ArrayList<>();
+			return;
+		}
+		minTourCost = Integer.MAX_VALUE;
 		tour=new ArrayList<>();
 		N=locToVisit.size()+1;
 		System.out.println(N-1);
